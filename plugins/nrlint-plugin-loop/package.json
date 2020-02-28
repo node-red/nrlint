@@ -1,0 +1,12 @@
+{
+  "name": "nrlint-plugin-loop",
+  "version": "0.0.1",
+  "description": "NRLint plugin to check whether loop exist.",
+  "main": "rule.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "private": true,
+  "author": "",
+  "license": "Apache-2.0"
+}

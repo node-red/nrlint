@@ -1,0 +1,31 @@
+{
+  "name": "nrlint-plugin-func-style-eslint",
+  "version": "0.0.1",
+  "description": "Plugin for nrlint: check JavaScript code in function node",
+  "main": "src/rule.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "postinstall": "webpack"
+  },
+  "private": true,
+  "keywords": [],
+  "author": "",
+  "license": "Apache-2.0",
+  "node-red": {
+    "nodes": {
+      "nrlint-plugin-func-style-eslint": "dist/plugin.js"
+    }
+  },
+  "devDependencies": {
+    "clean-webpack-plugin": "^3.0.0",
+    "copy-webpack-plugin": "^5.1.1",
+    "html-webpack-inline-source-plugin": "0.0.10",
+    "html-webpack-plugin": "^3.2.0",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11"
+  },
+  "dependencies": {
+    "eslint4b": "^6.8.0"
+  }
+}

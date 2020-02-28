@@ -1,0 +1,274 @@
+<script type="text/javascript">
+    // for non-standard Node-RED editor API
+    var XRED = {};
+</script>
+
+<script type="text/javascript">
+    // Flow Manipulation API
+    XRED.flowmanip = (function () {
+        function getFlowSet() {
+            return RED.nodes.createCompleteNodeSet();
+        }
+
+        var FlowSet = function() {
+            this.rn = RED.nodes;
+        };
+
+        FlowSet.prototype.getAllNodesArray = function () {
+            return RED.nodes.createCompleteNodeSet();
+        };
+
+        /**
+         * get ordinal node by id
+         * @param 
+         */ 
+        FlowSet.prototype.getNode = function (nid) {
+            var nn = RED.nodes.getNode(nid);
+            if (c.type !== "config" &&
+                c.type !== "tab" &&
+                c.type.indexOf("subflow") === 0) {
+                return nn;
+            } else {
+                return null;
+            }
+        }
+
+        /**
+         * get flow (aka. tab, workspace) by id
+         * @param {string} fid
+         */
+        FlowSet.prototype.getFlow = function (fid) {
+            return RED.nodes.workspace(fid);
+        }
+
+        /**
+         * get config node by id
+         * @param {string} cid
+         */
+        FlowSet.prototype.getConfig = function (cid) {
+            var c = RED.nodes.getNode(cid);
+            if (c.type === "config") {
+                return c;
+            } else {
+                return null;
+            }
+        }
+
+        /**
+         * get subflow by id
+         * @param {*} sid
+         */
+        FlowSet.prototype.getSubflow = function (sid) {
+            return RED.nodes.subflow(sid);
+        }
+
+        /**
+         * retrieve node ids that connected to designated node
+         * @param {string} nid
+         * @returns {string[]} list of Node ids
+         */
+        FlowSet.prototype.prev = function (nid) {
+            return RED.nodes.filterLinks({ target: nid }).map(function (e) { return e.source; });
+        }
+
+        /**
+         * retrieve node ids that connect from designated node
+         * @param {string} nid
+         * @returns {string[]} list of Node ids
+         */
+        FlowSet.prototype.next = function (nid) {
+            return RED.nodes.filterLinks({ source: nid }).map(function (e) { return e.target; });
+        }
+
+        /**
+         * insert node
+         * @param {Node} node - a node to be inserted
+         * @param {number} wid - a node port to be connected
+         * @param {string} pnid - id of the node in front of inserting node
+         * @param {number} pport - port number of previous node
+         * @param {string} nnid - id of the node after inserting node
+         */
+        FlowSet.prototype.insert = function (node, wid, pnid, pwid, nnid) {
+            // check whether node is not already connected.
+            var pnode = this.getNode(pnid);
+            var nnode = this.getNode(nnid);
+            if (pnode && nnode && pnode.z !== nnode.z) {
+                return false;
+            }
+
+            if (pnode) {
+                RED.nodes.addLink({ source: pnid, sourcePort: pport, target: node.id });
+            }
+            if (nnode) {
+                RED.nodes.addLink({ source: node.id, sourcePort: wid, target: nnid });
+            }
+
+            return;
+        }
+
+        /**
+         * remove node
+         */
+        FlowSet.prototype.remove = function (nid) {
+            return RED.nodes.remove(nid);
+        }
+
+        /**
+         * serialize node
+         * @param {*} format currently, only support 'JSON-1'.
+         */
+        FlowSet.prototype.serialize = function (format) {
+            var cns = RED.node.createCompleteNodeSet();
+            switch (format) {
+                case 'JSON-1':
+                    return cns;
+                    break;
+                case 'JSON-2':
+                    return null; // TODO: implement this
+                    break;
+                case 'YAML-1':
+                    return null; // TODO: implement this
+                    break;
+            }
+        }
+        /**
+         * get connected nodes by id
+         * @param {string} nid node id
+         * @returns {string[]} node id
+         */
+        FlowSet.prototype.connected = function (nid) {
+            var visitedNodes = [];
+            var visitingNodes = [nid];
+            while (visitingNodes.length > 0) {
+                var nn = visitingNodes.shift();
+                visitedNodes.push(nn);
+                var unvisitedNeighbours = this.prev(nn).concat(this.next(nn))
+                    .filter(function (e) { return visitedNodes.indexOf(e) < 0 && visitingNodes.indexOf(e) < 0 })
+                    .reduce(function (acc, e) { return acc.indexOf(e) < 0 ? acc.concat(e) : acc }, []); //  uniq
+                visitingNodes = visitingNodes.concat(unvisitedNeighbours);
+            }
+            return visitedNodes;
+        }
+
+        /**
+         * analyse difference of two flow
+         * @param {flow} comp flow to be compared
+         * @returns {Object} node ids of added, deleted, changed node
+         */
+        FlowSet.prototype.diff = function (comp) {
+            // TODO: implement
+            return null;
+        }
+
+        return {
+            FlowSet: FlowSet,
+        };
+    })();
+</script>
+
+<script type="text/javascript">
+    var lcontent = $("<div>").css({ "position": "relative", "height": "100%" });
+    var ltoolbar = $('<div class="sidebar-header">' +
+        '<span class="button-group">' +
+        '<a id="lint-tab-clear" class="sidebar-header-button" href="#">' +
+        '<i class="fa fa-trash"></i></a></span></div>').appendTo(lcontent);
+    var lfooterToolbar = $('<div>' +
+        '<span class="button-group">' +
+        '<a id="lint-tab-open" class="sidebar-footer-button" href="#">' +
+        '<i class="fa fa-desktop"></i></a></span></div>');
+
+    XRED.util = (function () {
+        function normalisePluginName(name) {
+            name = "nrlint-" + name;
+            var result = name.replace(/[^a-zA-Z0-9]/g, " ");
+            result = result.trim();
+            result = result.replace(/ +/g, " ");
+            result = result.replace(/ ./g,
+                function (s) {
+                    return s.charAt(1).toUpperCase();
+                }
+            );
+            result = result.charAt(0).toLowerCase() + result.slice(1);
+            return result;
+        }
+        return {
+            normalisePluginName: normalisePluginName
+        };
+    })();
+
+    function displayResult(result) {
+        for (var i = 0; i < result.length; i++) {
+            resid = result[i].ids[0];
+            var metaRow = $('<div class="lint-message red-ui-debug-msg-meta"></div>').appendTo(lcontent);
+            $('<span class="red-ui-debug-msg-date">' + (new Date()).toLocaleString() + '</span>').appendTo(metaRow);
+            $('<a>', { href: "#", class: "red-ui-debug-msg-name" }).text('node: ' + resid).appendTo(metaRow)
+                .on("click", function (closureItem) { 
+                    return function(evt) {
+                        evt.preventDefault();
+                        RED.view.reveal(closureItem);
+                    }
+                }(resid));
+            var el = $('<span class="lint-message red-ui-debug-msg-payload"></span>').appendTo(lcontent);
+            var debugMessage = RED.utils.createObjectElement(result[i].message, {
+                sourceId: result[i].ids[0]
+            });
+            debugMessage.appendTo(el);
+        }
+    }
+
+    function doLint() {
+        var config = RED.settings.nrlint;
+        var afs = new XRED.flowmanip.FlowSet();  // create sim for node objects
+        var result = [];
+        if (config.rules) {
+            var cxt = {};
+            config.rules.forEach(function(r) {
+                var pname = XRED.util.normalisePluginName(r.name);
+                if (window.hasOwnProperty(pname)) {
+                    var rule = window[pname];
+                    console.log('load:' + pname + ',' + JSON.stringify(rule, null, 2));
+                    res = rule.check(afs, r, cxt);
+                    Array.prototype.push.apply(result, res.result);
+                    cxt = res.context;
+                }
+            });
+        }
+        $(".lint-message").remove();
+        displayResult(result);
+
+        return "doLint() called.";
+    }
+
+    RED.events.on("nodes:change", function (state) {
+        //console.log("nrlint - nodechange handler");
+        var result = doLint();
+    });
+
+    RED.nodes.registerType('nrlint', {
+        category: 'config',
+        defaults: {
+            dummy: { value: "dummyString", required: false }
+        },
+        label: function () {
+            return this.name || "nrlint";
+        }
+    });
+
+    RED.sidebar.addTab({
+        id: "lint",
+        label: "lint",
+        name: "Flow Linter",
+        content: lcontent,
+        enableOnEdit: true,
+        pinned: true,
+        iconClass: "fa fa-paw",
+        action: "example:show-lint-tab"
+    });
+    RED.actions.add("example:show-lint-tab", function () { RED.sidebar.show("lint") });
+
+    ltoolbar.find("#lint-tab-clear").click(function (e) {
+        e.preventDefault();
+        $(".lint-message").remove();
+    });
+
+</script>
