@@ -62,8 +62,6 @@ module.exports = {
 
 ### From Node-RED Editor
 
-work in progress.
-<!-- 
 - clone this repository
 ```
  % git clone https://github.com/node-red/nrlint.git
@@ -79,10 +77,21 @@ work in progress.
 ```
 ...
     nrlint: {
-        rules: {
-            "no-func-name": "warn",
-            "func-style-eslint": { semi: 2 }
+      rules: [
+        {
+          "name": "no-func-name",
+          "mode": "warn",
+        },
+        {
+          "name": "func-style-eslint",
+          "parserOptions": {
+            "ecmaVersion": 6
+          },
+          "rules": {
+            "semi": 2
+          }
         }
+      ]
     }
 ...
 ```
@@ -90,10 +99,10 @@ work in progress.
 ```
  % npm start
 ```
-...then, lint tab (marked with paw) will be appeared.
--->
+- Then, lint tab (marked with a paw) will be appeared.
 
 ## Limitation
 - Only following rule can use from editor:
   - no-func-name
   - func-style-eslint
+  - flowsize
