@@ -1,8 +1,23 @@
 module.exports = {
     "rules": [
         {
-            name: "no-func-name",
-            mode: "warn",
+            name: "core",
+            subrules: [
+                {
+                    name: "flowsize",
+                    maxSize: 10
+                },
+                {
+                    name: "no-func-name",
+                    mode: "warn",
+                },
+                {
+                    name: "http-in-resp"
+                },
+                {
+                    name: "loop",
+                },                
+            ]
         },
         {
             name: "func-style-eslint",
@@ -12,16 +27,6 @@ module.exports = {
             rules: {
                 semi: 2
             }
-        },
-        {
-            name: "http-in-resp"
-        },
-        {
-            name: "loop",
-        },
-        {
-            name: "flowsize",
-            maxSize: 10
         }
     ]
 };

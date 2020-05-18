@@ -45,10 +45,10 @@
          * @param 
          */ 
         FlowSet.prototype.getNode = function (nid) {
-            var nn = RED.nodes.getNode(nid);
-            if (c.type !== "config" &&
-                c.type !== "tab" &&
-                c.type.indexOf("subflow") === 0) {
+            var nn = RED.nodes.node(nid);
+            if (nn.type !== "config" &&
+                nn.type !== "tab" &&
+                nn.type.indexOf("subflow") === -1) {
                 return nn;
             } else {
                 return null;
@@ -90,7 +90,7 @@
          * @returns {string[]} list of Node ids
          */
         FlowSet.prototype.prev = function (nid) {
-            return RED.nodes.filterLinks({ target: nid }).map(function (e) { return e.source; });
+            return RED.nodes.filterLinks({ target: { id: nid} }).map(function (e) { return e.source.id; });
         }
 
         /**
@@ -99,7 +99,7 @@
          * @returns {string[]} list of Node ids
          */
         FlowSet.prototype.next = function (nid) {
-            return RED.nodes.filterLinks({ source: nid }).map(function (e) { return e.target; });
+            return RED.nodes.filterLinks({ source: { id: nid} }).map(function (e) { return e.target.id; });
         }
 
         /**
@@ -171,6 +171,45 @@
             }
             return visitedNodes;
         }
+
+        /**
+         * get downstream nodes by id
+         * @param {string} nid node id
+         * @returns {string[]} node id
+         */
+        FlowSet.prototype.downstream = function (nid) {
+            var visitedNodes = [];
+            var visitingNodes = [nid];
+            while (visitingNodes.length > 0) {
+                var nn = visitingNodes.shift();
+                visitedNodes.push(nn);
+                var unvisitedDownstream = this.next(nn)
+                    .filter(function(e) { return visitedNodes.indexOf(e) < 0 && visitingNodes.indexOf(e) < 0})
+                    .reduce(function(acc, e) { return acc.indexOf(e) < 0 ? acc.concat(e) : acc }, []);
+                visitingNodes = visitingNodes.concat(unvisitedDownstream);
+            }
+            return visitedNodes;
+        }
+
+        /**
+         * get upstream nodes by id
+         * @param {string} nid node id
+         * @returns {string[]} node ids
+         */
+        FlowSet.prototype.upstream = function (nid) {
+            var visitedNodes = [];
+            var visitingNodes = [nid];
+            while (visitingNodes.length > 0) {
+                var nn = visitingNodes.shift();
+                visitedNodes.push(nn);
+                var unvisitedUpstream = this.prev(nn)
+                    .filter(function(e) { return visitedNodes.indexOf(e) < 0 && visitingNodes.indexOf(e) < 0 })
+                    .reduce(function(acc,e) { return acc.indexOf(e) < 0 ? acc.concat(e) : acc}, []);
+                visitingNodes = visitingNodes.concat(unvisitedUpstream);
+            }
+            return visitedNodes;
+        }
+
 
         /**
          * analyse difference of two flow
