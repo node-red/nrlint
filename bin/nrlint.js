@@ -19,7 +19,7 @@
 /* eslint no-process-exit: 0 */
 const nopt = require('nopt');
 const FlowSet = require('../lib/flowmanip').FlowSet;
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 const linter = require('../lib/linter');
 const os = require('os');
@@ -38,19 +38,22 @@ const shortHands = {
 
 const parsedArgs = nopt(knownOpts, shortHands, process.argv, 2);
 
+const helpMessage = `Lint tool for Node-RED flow
+Usage: nrlint [-h] [-c configfile] flows.json'
+
+Options:
+  -h, --help                show this help
+  -c, --config configfile   use specified configuration
+                            otherwise, use .nrlintrc.js`;
+
 if (parsedArgs.help) {
-    console.log('Lint tool for Node-RED flow');
-    console.log('Usage: nrlint [-h] flow.json');
-    console.log('');
-    console.log('Options:');
-    console.log('  -h, --help            show this help');
-    console.log('  -c, --config   FILE   use specified configuration');
-    console.log('                        otherwise, use .nrlintrc.js');
+    console.log(helpMessage);
     process.exit();
 }
 
 if (parsedArgs.argv.remain.length !== 1) {
     console.error('Error: no input file');
+    console.error(helpMessage);
     process.exit(1);
 }
 
@@ -66,17 +69,12 @@ try {
     process.exit(1);
 }
 
-flowFile = parsedArgs.argv.remain[0];
-console.log(`parsing ${flowFile}...`);
-
-const flowstr = fs.readFileSync(flowFile);
-const flowobj = JSON.parse(flowstr);
+const flowFile = parsedArgs.argv.remain[0];
 
 function printResult(res) {  // TODO: customizable output format
     let errCount = 0;
     let warnCount = 0;
 
-    console.log(flowFile);
     res.result.forEach((e) => {
         if (!e.error) {
             console.log(`  ${e.ids[0]}${e.ids.length>1?"...":""}\t${e.severity}\t'${e.message}'\t${e.name}`);
@@ -90,6 +88,16 @@ function printResult(res) {  // TODO: customizable output format
     console.log(`✖ ${errCount+warnCount} problems (${errCount} errors, ${warnCount} warnings)`);
 }
 
-const result = linter.doLint(flowobj, config).then(printResult);
+(async () => {
+    try {
+        const flowstr = await fs.readFile(flowFile);
+        console.log(`parsing ${flowFile}...`);
+        const flowobj = JSON.parse(flowstr);
+        const result = await linter.doLint(flowobj, config);
+        printResult(result);
+    } catch(err) {
+        console.error(`${err.toString()}`);
+    }
+})();
 
 process.exitCode = 0;
