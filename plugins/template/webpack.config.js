@@ -1,8 +1,10 @@
+const pluginName = "YOUR-PLUGIN-NAME";   // <- REPLACE WITH YOUR PLUGIN NAME
+
 const path = require('path');
-const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin');
 
 function normalisePluginName(name) {
     name = "nrlint-" + name;
@@ -21,22 +23,37 @@ function normalisePluginName(name) {
 module.exports = {
     entry: './src/rule.js',
     output: {
-        filename: 'temp.js',
+        filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist'),
-        library: normalisePluginName('no-func-name'),
+        library: normalisePluginName(pluginName),
         libraryTarget: 'var'
     },
     plugins: [
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
-            template: 'src/plugin.html',
-            inlineSource: '.js$',
-            filename: 'plugin.html'
+            filename: 'plugin.html',
+            templateContent: ''
         }),
-        new HtmlWebpackInlineSourcePlugin(),
+        new ScriptExtHtmlWebpackPlugin({
+            inline: 'bundle.js'
+        }),
         new CopyWebpackPlugin([
-            { from: 'src/plugin.js' },
+            { from: 'src/plugin.js' }
         ]),
     ],
-    mode: 'production'
+    module: {
+        rules: [
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: ['@babel/preset-env']
+                    }
+                }
+            }
+        ]
+    },
+    mode: 'development'
 };

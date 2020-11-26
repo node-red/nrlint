@@ -12,6 +12,28 @@
 
         var FlowSet = function() {
             this.rn = RED.nodes;
+            var flows = [];
+            var configs = [];
+            var subflows = [];
+            var links = [];
+            RED.nodes.eachWorkspace(function(ws) {
+                var f = new FMFlow(ws.id, ws.name);
+                f.nodes = RED.nodes.filterNodes({z:ws.id});
+                flows.push(f);
+            });
+            RED.nodes.eachConfig(function(cn) {
+                configs.push(cn);
+            });
+            RED.nodes.eachSubflow(function(sf) {
+                subflows.push(sf);
+            });
+            RED.nodes.eachLink(function(ln) {
+                links.push(ln);
+            });
+            this.flows = flows;
+            this.configs = configs;
+            this.subflows = subflows;
+            this.links = links;
         };
 
         FlowSet.prototype.getAllNodesArray = function () {
@@ -23,10 +45,10 @@
          * @param 
          */ 
         FlowSet.prototype.getNode = function (nid) {
-            var nn = RED.nodes.getNode(nid);
-            if (c.type !== "config" &&
-                c.type !== "tab" &&
-                c.type.indexOf("subflow") === 0) {
+            var nn = RED.nodes.node(nid);
+            if (nn.type !== "config" &&
+                nn.type !== "tab" &&
+                nn.type.indexOf("subflow") === -1) {
                 return nn;
             } else {
                 return null;
@@ -68,7 +90,7 @@
          * @returns {string[]} list of Node ids
          */
         FlowSet.prototype.prev = function (nid) {
-            return RED.nodes.filterLinks({ target: nid }).map(function (e) { return e.source; });
+            return RED.nodes.filterLinks({ target: { id: nid} }).map(function (e) { return e.source.id; });
         }
 
         /**
@@ -77,7 +99,7 @@
          * @returns {string[]} list of Node ids
          */
         FlowSet.prototype.next = function (nid) {
-            return RED.nodes.filterLinks({ source: nid }).map(function (e) { return e.target; });
+            return RED.nodes.filterLinks({ source: { id: nid} }).map(function (e) { return e.target.id; });
         }
 
         /**
@@ -151,6 +173,45 @@
         }
 
         /**
+         * get downstream nodes by id
+         * @param {string} nid node id
+         * @returns {string[]} node id
+         */
+        FlowSet.prototype.downstream = function (nid) {
+            var visitedNodes = [];
+            var visitingNodes = [nid];
+            while (visitingNodes.length > 0) {
+                var nn = visitingNodes.shift();
+                visitedNodes.push(nn);
+                var unvisitedDownstream = this.next(nn)
+                    .filter(function(e) { return visitedNodes.indexOf(e) < 0 && visitingNodes.indexOf(e) < 0})
+                    .reduce(function(acc, e) { return acc.indexOf(e) < 0 ? acc.concat(e) : acc }, []);
+                visitingNodes = visitingNodes.concat(unvisitedDownstream);
+            }
+            return visitedNodes;
+        }
+
+        /**
+         * get upstream nodes by id
+         * @param {string} nid node id
+         * @returns {string[]} node ids
+         */
+        FlowSet.prototype.upstream = function (nid) {
+            var visitedNodes = [];
+            var visitingNodes = [nid];
+            while (visitingNodes.length > 0) {
+                var nn = visitingNodes.shift();
+                visitedNodes.push(nn);
+                var unvisitedUpstream = this.prev(nn)
+                    .filter(function(e) { return visitedNodes.indexOf(e) < 0 && visitingNodes.indexOf(e) < 0 })
+                    .reduce(function(acc,e) { return acc.indexOf(e) < 0 ? acc.concat(e) : acc}, []);
+                visitingNodes = visitingNodes.concat(unvisitedUpstream);
+            }
+            return visitedNodes;
+        }
+
+
+        /**
          * analyse difference of two flow
          * @param {flow} comp flow to be compared
          * @returns {Object} node ids of added, deleted, changed node
@@ -160,8 +221,15 @@
             return null;
         }
 
+        var FMFlow = function(id, name) {
+            this.id = id;
+            this.name = name || "";
+            this.nodes = [];
+        };
+
         return {
             FlowSet: FlowSet,
+            FMFlow: FMFlow,
         };
     })();
 </script>
@@ -197,10 +265,17 @@
     })();
 
     function displayResult(result) {
+        var warnCount = 0;
+        var errCount = 0;
+        var table = $('<table class="lint-message red-ui-info-table"></table>').appendTo(lcontent);
+        var tableBody = $('<tbody>').appendTo(table);
+
         for (var i = 0; i < result.length; i++) {
             resid = result[i].ids[0];
+            if (result[i].severity === "warn") { warnCount++; }
+            if (result[i].severity === "error") { errCount++; }
             var metaRow = $('<div class="lint-message red-ui-debug-msg-meta"></div>').appendTo(lcontent);
-            $('<span class="red-ui-debug-msg-date">' + (new Date()).toLocaleString() + '</span>').appendTo(metaRow);
+            //$('<span class="red-ui-debug-msg-date">' + (new Date()).toLocaleString() + '</span>').appendTo(metaRow);
             $('<a>', { href: "#", class: "red-ui-debug-msg-name" }).text('node: ' + resid).appendTo(metaRow)
                 .on("click", function (closureItem) { 
                     return function(evt) {
@@ -208,19 +283,19 @@
                         RED.view.reveal(closureItem);
                     }
                 }(resid));
-            var el = $('<span class="lint-message red-ui-debug-msg-payload"></span>').appendTo(lcontent);
-            var debugMessage = RED.utils.createObjectElement(result[i].message, {
-                sourceId: result[i].ids[0]
-            });
-            debugMessage.appendTo(el);
+            var el = $('<span class="lint-message"></span>').appendTo(lcontent);
+            $('<div></div>').text(result[i].message).appendTo(el);
         }
+
+        $('<tr class="red-ui-help-info-row"><td>Warn</td><td align="right">'+warnCount+'</td></tr>').appendTo(tableBody);
+        $('<tr class="red-ui-help-info-row"><td>Error</td><td align="right">'+errCount+'</td></tr>').appendTo(tableBody);
     }
 
     function doLint() {
         var config = RED.settings.nrlint;
         var afs = new XRED.flowmanip.FlowSet();  // create sim for node objects
         var result = [];
-        if (config.rules) {
+        if (config.rules && Array.isArray(config.rules)) {
             var cxt = {};
             config.rules.forEach(function(r) {
                 var pname = XRED.util.normalisePluginName(r.name);
@@ -271,4 +346,36 @@
         $(".lint-message").remove();
     });
 
+</script>
+
+<script type="text/javascript">
+        var nrlintFlowsize = {
+            check: function (afs, conf, cxt) {
+                var flows = afs.flows;
+                var result = [];
+
+                flows.forEach(function (flow) {
+                    var nodes = flow.nodes;
+                    var maxSize = 100;
+
+                    if (conf.hasOwnProperty("maxSize")) {
+                        maxSize = conf.maxSize;
+                    }
+
+                    if (nodes.length > maxSize) {
+                        result.push({
+                            rule: "flowsize",
+                            ids: [flow.id],
+                            name: "flowsize",
+                            severity: "warn",
+                            message: "too large flow size"
+                        });
+                    }
+                });
+                return {
+                    context: cxt,
+                    result: result
+                };
+            }
+        };
 </script>

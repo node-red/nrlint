@@ -1,12 +1,12 @@
 {
-  "name": "nrlint-plugin-no-func-name",
+  "name": "nrlint-plugin-YOUR-PLUGIN-NAME",
   "version": "0.0.1",
-  "description": "Plugin for nrlint: check existence of name for function node",
+  "description": "TEMPLATE FOR NRLINT PLUGIN",
   "main": "src/rule.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
-    "postinstall": "webpack"
+    "prepare": "npm run build"
   },
   "private": true,
   "keywords": [],
@@ -15,14 +15,14 @@
   "devDependencies": {
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^5.1.1",
-    "html-webpack-inline-source-plugin": "0.0.10",
     "html-webpack-plugin": "^3.2.0",
-    "webpack": "^4.41.6",
+    "script-ext-html-webpack-plugin": "^2.1.4",
+    "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11"
   },
   "node-red": {
     "nodes": {
-      "nrlint-plugin-no-func-name": "dist/plugin.js"
+      "nrlint-plugin-YOUR-PLUGIN-NAME": "dist/plugin.js"
     }
   }
 }

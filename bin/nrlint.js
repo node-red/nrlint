@@ -78,11 +78,13 @@ function printResult(res) {  // TODO: customizable output format
 
     console.log(flowFile);
     res.result.forEach((e) => {
-        console.log(`  ${e.ids[0]}${e.ids.length>1?"...":""}\t${e.severity}\t'${e.message}'\t${e.name}`);
-        if (e.severity === "error") {
-            errCount += 1;
-        } else if (e.severity === "warn") {
-            warnCount += 1;
+        if (!e.error) {
+            console.log(`  ${e.ids[0]}${e.ids.length>1?"...":""}\t${e.severity}\t'${e.message}'\t${e.name}`);
+            if (e.severity === "error") {
+                errCount += 1;
+            } else if (e.severity === "warn") {
+                warnCount += 1;
+            }
         }
     });
     console.log(`✖ ${errCount+warnCount} problems (${errCount} errors, ${warnCount} warnings)`);
