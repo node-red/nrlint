@@ -8,12 +8,15 @@ module.exports = function(grunt) {
                 src: [ 'test/**/*_spec.js' ]
             }
         },
-        mocha_istanbul: {
+        nyc: {
             options: {
-                timeout: 10000
-            }, 
+                reporter: ['lcov', 'html', 'text-summary'],
+                reportDir: 'coverage',
+                all: true
+            },
             all: {
-                src: [ 'test/**/*_spec.js' ]
+                cmd: false,
+                args: [ 'grunt', 'simplemocha:all' ]
             }
         },
         eslint: {
@@ -29,10 +32,10 @@ module.exports = function(grunt) {
         }
     });
     grunt.loadNpmTasks('grunt-simple-mocha');
-    grunt.loadNpmTasks('grunt-mocha-istanbul');
+    grunt.loadNpmTasks('grunt-simple-nyc');
     grunt.loadNpmTasks('grunt-eslint');
     grunt.loadNpmTasks('grunt-jsdoc');
     grunt.registerTask('default', ['eslint']);
     grunt.registerTask('test', ['simplemocha']);
-    grunt.registerTask('coverage', 'Run Instanbul code test coverage task', [ 'mocha_istanbul:all' ]);
+    grunt.registerTask('coverage', 'Run Instanbul code test coverage task', [ 'nyc:all' ]);
 };
