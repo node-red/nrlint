@@ -1,5 +1,5 @@
 module.exports = {
-  "extends": ["plugin:node/recommended"],
+  "extends": ["eslint:recommended", "plugin:node/recommended"],
   "env": {
     "es6": true,
     "mocha": true
@@ -29,12 +29,14 @@ module.exports = {
     "no-loop-func": 2,
     "no-shadow": 0,
     "dot-notation": 0,
-    "no-proto": 2
+    "no-proto": 2,
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
   },
   "overrides": [{
     "files": "test/**/*_spec.js",
     "rules": {
-      "node/no-unpublished-require": 0
+      "node/no-unpublished-require": 0,
+      "no-unused-vars": ["error", {"varsIgnorePattern": "should|expect"}]
     }
   }]
 };

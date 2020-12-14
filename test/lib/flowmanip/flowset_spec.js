@@ -46,7 +46,7 @@ describe('FMFlowSet object', function() {
             const ids = [];
             for (const elem of fs) {
                 ids.push(elem.id);
-            };
+            }
             ids.should.have.lengthOf(8); // 6 ordinal nodes, 1 node in subflow, 1 config node.
             ids.should.have.members([
                 "30c7148b.918b9c",  // comment

@@ -18,7 +18,6 @@
 
 /* eslint no-process-exit: 0 */
 const nopt = require('nopt');
-const FlowSet = require('../lib/flowmanip').FlowSet;
 const fs = require('fs');
 const path = require('path');
 const linter = require('../lib/linter');

@@ -35,7 +35,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-simple-nyc');
     grunt.loadNpmTasks('grunt-eslint');
     grunt.loadNpmTasks('grunt-jsdoc');
-    grunt.registerTask('default', ['eslint']);
+    grunt.registerTask('default', ['eslint','test','coverage']);
     grunt.registerTask('test', ['simplemocha']);
     grunt.registerTask('coverage', 'Run Instanbul code test coverage task', [ 'nyc:all' ]);
 };

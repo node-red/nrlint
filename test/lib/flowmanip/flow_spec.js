@@ -31,7 +31,7 @@ describe('FMFlow object', function() {
             let acc = [];
             for (const n of f) {
                 acc.push(n);
-            };
+            }
             acc.should.have.members([n1, n2, n3]);
         });
     });
@@ -60,7 +60,6 @@ describe('FMFlow object', function() {
         });
         it('should return undefined if a node is not found', function() {
             const f = new FMFlow();
-            const nid = "dummyId";
             const n1 = new FMNode();
             f.addNode(n1);
             const result = f.getNode("otherId");
