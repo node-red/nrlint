@@ -19,7 +19,7 @@
 /* eslint no-process-exit: 0 */
 const nopt = require('nopt');
 const FlowSet = require('../lib/flowmanip').FlowSet;
-const fs = require('fs').promises;
+const fs = require('fs');
 const path = require('path');
 const linter = require('../lib/linter');
 const os = require('os');
@@ -90,7 +90,7 @@ function printResult(res) {  // TODO: customizable output format
 
 (async () => {
     try {
-        const flowstr = await fs.readFile(flowFile);
+        const flowstr = fs.readFileSync(flowFile);
         console.log(`parsing ${flowFile}...`);
         const flowobj = JSON.parse(flowstr);
         const result = await linter.doLint(flowobj, config);
