@@ -32,7 +32,7 @@ function isSameLoop(array1, array2) {
 /**
  * enumerate loops in flows
  * @param {FlowSet} afs FlowSet
- * @returns {string[][]}Array of loops 
+ * @returns {string[][]} Array of loops 
  */
 function enumLoops(afs) {
     let loops = [];
@@ -79,7 +79,7 @@ function checkLoop(afs, conf, cxt) {
 
     return {
         context: cxt,
-        result: loops.map(l => {return {rule: "loop", ids: l, severity: "warn", name: "loop", message: "possible infinite loop detected"};})
+        result: loops.map(l => {return {rule: "core", ids: [...new Set(l)], severity: "warn", name: "loop", message: "possible infinite loop detected"};})
     };
 }
 
@@ -97,7 +97,7 @@ function checkHttpInResp(afs, conf, cxt) {
             const ds = afs.downstream(e.id);
             return ds.length === 0 || ds.every(i => afs.getNode(i).type != 'http response');
         })
-        .map(e => ({rule:"http-in-resp", ids: [e.id], name: "dangling-http-in", severity: "warn", message: "dangling http-in node"}));
+        .map(e => ({rule:"core", ids: [e.id], name: "dangling-http-in", severity: "warn", message: "dangling http-in node"}));
 
     const danglingHttpResponses = afs.getAllNodesArray()
         .filter(e => e.type==='http response')
@@ -105,7 +105,7 @@ function checkHttpInResp(afs, conf, cxt) {
             const ds = afs.upstream(e.id);
             return ds.length === 0 || ds.every(i => afs.getNode(i).type != 'http in');
         })
-        .map(e => ({rule:"http-in-resp", ids: [e.id], name: "dangling-http-resp", severity: "warn", message: "dangling http-response node"}));
+        .map(e => ({rule:"core", ids: [e.id], name: "dangling-http-resp", severity: "warn", message: "dangling http-response node"}));
 
     return {context: cxt, result: danglingHttpIns.concat(danglingHttpResponses)};
 } 
@@ -124,7 +124,7 @@ function checkFlowSize(afs, conf, cxt) {
     flows.forEach((flow) => {
         const nodes = flow.nodes;
         let maxSize = 100;
-        if (conf.hasOwnProperty("maxSize")) {
+        if ('maxSize' in conf) {
             maxSize = conf.maxSize;
         }
         if (nodes.length > maxSize) {
@@ -154,7 +154,7 @@ function checkNoFuncName(afs, conf, cxt) {
     var verified = funcs
         .filter(function (e) {return e.name === undefined || e.name === "";})
         .map(function (e){
-            return {rule:"no-func-name", ids: [e.id], severity: "warn", name: "no-func-name", message: "function node has no name"};
+            return {rule:"core", ids: [e.id], severity: "warn", name: "no-func-name", message: "function node has no name"};
         });
 
     return {context: cxt, result: verified};
@@ -179,7 +179,7 @@ function check(afs, conf, cxt) {
     if (Array.isArray(conf.subrules)) {
         conf.subrules.forEach(e => {
             let retval;
-            if (ruleMap.hasOwnProperty(e.name)) {
+            if (e.name in ruleMap) {
                 retval = ruleMap[e.name](afs, e, cxt);
             } else {
                 retval = {result: [], context: cxt};

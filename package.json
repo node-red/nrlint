@@ -18,7 +18,10 @@
     "nrlint": "./bin/nrlint.js"
   },
   "node-red": {
-    "nodes": {
+    "plugins": {
+      "nrlint": "nr/nrlint.html"
+    },
+    "ignorethis-nodes": {
       "nrlint": "nr/nrlint.js"
     }
   },
@@ -40,6 +43,7 @@
   },
   "dependencies": {
     "clone": "^2.1.2",
-    "nopt": "^5.0.0"
+    "nopt": "^5.0.0",
+    "nrlint-plugin-func-style-eslint": "file:plugins/nrlint-plugin-func-style-eslint"
   }
 }

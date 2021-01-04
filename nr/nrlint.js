@@ -27,4 +27,11 @@ module.exports = (RED) => {
             }
         }
     });
+
+    // above will be replaced with below:
+    //RED.plugins.registerPlugin('nrlint', {
+    //    type: 'nrlint-main',
+    //    onadd: () => {console.log('nrlint:onadd');},
+    //    onremove: () => {console.log('nrlint:onremove');}
+    //});
 };
