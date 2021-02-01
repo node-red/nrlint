@@ -239,8 +239,6 @@
     RED.plugins.registerPlugin('nrlint', {
         type: 'nrlint-main',
         onadd: function() {
-            console.log('nrlint:onadd start');
-
             function displayResult(result) {
                 var warnCount = 0;
                 var errCount = 0;
@@ -271,18 +269,15 @@
 
             function doLint() {
                 var config = RED.settings.nrlint;
-                var config = {rules: [{name: "core", subrules: [{name: "no-func-name", mode: "warn"}]}]};  // dummy setting
                 var afs = new FlowSet();  // create sim for node objects
                 var result = [];
                 var plugins = RED.plugins.getPluginsByType('nrlint-rule');
                 var rules = plugins.filter(p=>p.type==='nrlint-rule'); // it should be 'plugins.plugins.filter()'...
-                console.log('rules='+JSON.stringify(rules));
                 if (config.rules && Array.isArray(config.rules)) {
                     var cxt = {};
                     config.rules.forEach(function(r) {
                         var i = rules.findIndex(j=>j.id === ('nrlint-plugin-'+r.name));
                         if (i >= 0) {
-                            console.log('find rule:'+JSON.stringify(rules[i].id));
                             res = rules[i].check(afs, r, cxt);
                             Array.prototype.push.apply(result, res.result);
                             cxt = res.context;
@@ -307,7 +302,7 @@
 
             // move initialize logic to this function.
             RED.events.on("registry:plugin-added", function (pname) {
-                console.log("nrlint - caught registry:plugin-added event (name:"+pname+") ");
+                //console.log("nrlint - caught registry:plugin-added event (name:"+pname+") ");
             });
             RED.events.on("nodes:change", function (state) {
                 //console.log("nrlint - node:change handler");
@@ -339,7 +334,9 @@
                 $(".lint-message").remove();
             });
         },
-        onremove: function() {console.log('nrlint:onremove');}
+        onremove: function() {
+            //console.log('nrlint:onremove');
+        }
     });
 })();
 </script>

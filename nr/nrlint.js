@@ -15,23 +15,16 @@
  **/
 
 module.exports = (RED) => {
-    function Node(n) {
-        RED.nodes.createNode(this,n);
-    }
-
-    RED.nodes.registerType("nrlint", Node, {
-        settings: {
-            nrlint: {
-                value: {},
-                exportable: true
-            }
-        }
+    RED.plugins.registerPlugin('nrlint', {
+        type: 'nrlint-main',
+        onadd: () => {
+            RED.settings.registerNodeSettings('nrlint', {
+                nrlint: {
+                    value: {},
+                    exportable: true
+                }
+            });        
+        },
+        onremove: () => {}
     });
-
-    // above will be replaced with below:
-    //RED.plugins.registerPlugin('nrlint', {
-    //    type: 'nrlint-main',
-    //    onadd: () => {console.log('nrlint:onadd');},
-    //    onremove: () => {console.log('nrlint:onremove');}
-    //});
 };

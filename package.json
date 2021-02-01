@@ -19,7 +19,7 @@
   },
   "node-red": {
     "plugins": {
-      "nrlint": "nr/nrlint.html"
+      "nrlint": "nr/nrlint.js"
     },
     "ignorethis-nodes": {
       "nrlint": "nr/nrlint.js"
