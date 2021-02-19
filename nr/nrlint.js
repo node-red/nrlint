@@ -17,14 +17,10 @@
 module.exports = (RED) => {
     RED.plugins.registerPlugin('nrlint', {
         type: 'nrlint-main',
-        onadd: () => {
-            RED.settings.registerNodeSettings('nrlint', {
-                nrlint: {
-                    value: {},
-                    exportable: true
-                }
-            });        
+        settings: {
+            "*": { exportable: true }
         },
+        onadd: () => {},
         onremove: () => {}
     });
 };
