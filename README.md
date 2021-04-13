@@ -19,18 +19,18 @@ This repository contains following submodules.
 
 ### From Command-line
 - clone this repository
-```
+```sh
  % git clone https://github.com/node-red/nrlint.git
 ```
 - install nrlint (and included plugins)
-```
+```sh
  % npm install -g /path/to/nrlint
  ...
 ```
 - add lint configuration to $HOME/.nrlintrc.js
-```
+```js
 module.exports = {
-  "rules": [
+  rules: [
     {
       name: "core",
       subrules: [
@@ -40,7 +40,7 @@ module.exports = {
         },
         {
           name: "no-func-name",
-          mode: "warn",
+          severity: "warn",
         },
         {
           name: "http-in-resp"
@@ -51,12 +51,12 @@ module.exports = {
       ]
     },
     {
-      "name": "func-style-eslint",
-      "parserOptions": {
-        "ecmaVersion": 6
+      name: "func-style-eslint",
+      parserOptions: {
+        ecmaVersion: 6
       },
-      "rules": {
-        "semi": 2
+      rules: {
+        semi: 2
       }
     },
   ]
@@ -68,23 +68,23 @@ module.exports = {
 ```
 
 - run nrlint command
-```
+```sh
  % nrlint /path/to/flow.json
 ```
 
 ### From Node-RED Editor
 
 - clone this repository
-```
+```sh
  % git clone https://github.com/node-red/nrlint.git
 ```
 - install nrlint 
-```
+```sh
  % cd $HOME/.node-red
  % npm install /path/to/nrlint
 ```
 - add lint configuration to $HOME/settings.js
-```
+```js
 ...
   nrlint: {
     rules: [
@@ -93,28 +93,114 @@ module.exports = {
         subrules: [
           {
             name: "no-func-name",
-            mode: "warn"
+            severity: "warn"
           },
           {
             name: "flowsize",
             maxSize: 10
+            severity: "error"
           },
           {
-            name: "http-in-resp"
+            name: "http-in-resp",
+            severity: "warn"
           },
           {
-            name: "loop"
+            name: "loop",
+            severity: "warn"
           }
         ]
-      }
+      },
+      {
+        name: "func-style-eslint",
+        parserOptions: {
+          ecmaVersion: 6
+        },
+        rules: {
+          semi: 2
+        }
+      },
     ]
   }
 ...
 ```
 - run Node-RED
-```
+```sh
  % npm start
 ```
 - Then, lint tab (marked with a paw) will be appeared.
 
-  
+## Configuration
+
+Configuration has the following structure:
+```js
+rules: [
+  {
+    name: "NAME_OF_RULE",
+    severity: "(error|warn)"
+    other_setting_key: "OTHER_SETTING_VALUE"
+  },
+  //...
+]
+```
+### `core` plugin
+
+The core plugin contains multiple rules, so you can configure each rule in `subrules` array.
+`subrules` array have the same structure as `rules`.
+
+#### rule `no-func-name`
+This rule checks an existence of name of a function node.
+```js
+{
+  name: "no-func-name",
+  severity: "warn"
+}
+```
+- `severity`: rule severity
+
+#### rule `flowsize`
+This rule checks a size of each flow (a.k.a tab, workspace).
+```js
+{
+  name: "flowsize",
+  severity: "warn",
+  maxSize: 100
+}
+```
+- `severity`: rule severity
+- `maxSize`: if number of nodes in a flow exceeded this value, warning or error will emit.
+
+#### rule `http-in-resp`
+This rule checks whether an HTTP-in node has corresponding HTTP-response node (or vice versa).
+```js
+{
+  name: "http-in-resp",
+  severity: "warn"
+}
+```
+- `severity`: rule severity
+
+#### rule `loop`
+This rule checks possibility of infinite loops in a flow.
+```js
+{
+  name: "loop",
+  severity: "warn"
+}
+```
+- `severity`: rule severity
+
+### `func-style-eslint` plugin
+This rule checks coding style in a function nodes.
+```js
+{
+  name: "func-style-eslint"
+  parserOptions: {
+    ecmaVersion: 6
+  },
+  rules: {
+    semi: 2
+  }
+}
+```
+- `parserOptions`, `rules` etc.: ESLint configuration parameters.  See [ESLint documentation](https://eslint.org/docs/user-guide/configuring/)
+
