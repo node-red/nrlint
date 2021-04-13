@@ -20,7 +20,8 @@
   "node-red": {
     "plugins": {
       "nrlint": "packages/node_modules/nrlint-main/nr/nrlint.js",
-      "nrlint-plugin-core": "packages/node_modules/nrlint-plugin-core/nr/rule.html"
+      "nrlint-plugin-core": "packages/node_modules/nrlint-plugin-core/nr/rule.html",
+      "nrlint-plugin-func-style-eslint": "packages/node_modules/nrlint-plugin-func-style-eslint/nr/rule.html"
     }
   },
   "engines": {
