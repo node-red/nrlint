@@ -1,3 +1,4 @@
+
 module.exports = function(grunt) {
     grunt.initConfig({
         simplemocha: {
@@ -5,11 +6,24 @@ module.exports = function(grunt) {
                 timeout: 10000
             },
             all: {
-                src: [ 'test/**/*_spec.js' ]
+                src: [
+                    'test/**/*_spec.js',
+                    'packages/node_modules/nrlint-main/test/**/*_spec.js',
+                    'packages/node_modules/nrlint-plugin-core/test/**/*_spec.js',
+                    'packages/node_modules/nrlint-plugin-func-style-eslint/test/**/*_spec.js'
+                ]
             }
         },
         nyc: {
             options: {
+                cwd: '.',
+                include: [
+                    'packages/node_modules/nrlint-main/bin/*.js',
+                    'packages/node_modules/nrlint-main/lib/**/*.js',
+                    'packages/node_modules/nrlint-plugin-core/cli/*.js',
+                    'packages/node_modules/nrlint-plugin-func-style-eslint/cli/*.js',
+                ],
+                excludeNodeModules: false,
                 reporter: ['lcov', 'html', 'text-summary'],
                 reportDir: 'coverage',
                 all: true
@@ -20,13 +34,28 @@ module.exports = function(grunt) {
             }
         },
         eslint: {
-            target: [ 'bin/**/*.js', 'lib/**/*.js', 'test/**/*_spec.js' ]
+            target: [
+                'test/**/*_spec.js',
+                'packages/node_modules/*/bin/**/*.js',
+                'packages/node_modules/*/lib/**/*.js',
+                'packages/node_modules/*/cli/**/*.js',
+                'packages/node_modules/*/test/**/*_spec.js'
+            ]
         },
         jsdoc: {
             dist: {
-                src: [ 'bin/**/*.js', 'lib/**/*.js' ],
+                src: [
+                    'packages/node_modules/nrlint-main/lib/**/*.js'
+                ],
                 options: {
                     destination: 'doc',
+                }
+            }
+        },
+        'npm-command': {
+            'func-style-eslint': {
+                options: {
+                    cwd: 'packages/node_modules/nrlint-plugin-func-style-eslint/'
                 }
             }
         }
@@ -35,7 +64,9 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-simple-nyc');
     grunt.loadNpmTasks('grunt-eslint');
     grunt.loadNpmTasks('grunt-jsdoc');
-    grunt.registerTask('default', ['eslint','test','coverage']);
-    grunt.registerTask('test', ['simplemocha']);
-    grunt.registerTask('coverage', 'Run Instanbul code test coverage task', [ 'nyc:all' ]);
+    grunt.loadNpmTasks('grunt-npm-command');
+    grunt.registerTask('default', ['eslint','npm-command','nyc:all']);
+    grunt.registerTask('test', ['simplemocha:all']);
+    grunt.registerTask('doc', ['jsdoc']);
+    grunt.registerTask('coverage', ['nyc:all'])
 };

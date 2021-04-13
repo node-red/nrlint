@@ -4,6 +4,9 @@ module.exports = {
         "es6": true,
         "mocha": true
     },
+    "ignorePatterns": [
+        "!packages/node_modules/*"
+    ],
     "globals": {},
     "rules": {
         "semi": [
@@ -33,7 +36,10 @@ module.exports = {
         "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
     },
     "overrides": [{
-        "files": ["test/**/*_spec.js", "plugins/**/test/*_spec.js"],
+        "files": [
+            "test/**/*_spec.js",
+            "packages/node_modules/*/test/**/*_spec.js"
+        ],
         "rules": {
             "node/no-unpublished-require": 0,
             "no-unused-vars": ["error", { "varsIgnorePattern": "should|expect" }]

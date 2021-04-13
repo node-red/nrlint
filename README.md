@@ -3,18 +3,17 @@ Node-RED Flow Linter
 
 _**WORK IN PROGRESS.  Current code is aimed for investigating architecture of flow linter.**_ 
 
-This repository contains following 3 modules.
+This repository contains following submodules.
 
-- nrlint
-  - main module for Node-RED flow linter.
+- nrlint-main
+  -  main plugin, and CLI frontend
 - nrlint-plugin-core
   - core rule plugin for following: 
-    - check whether a function node has a name.
-    - check whether each http-in node has corresponding http-response, and vice versa.
-    - check whether a flow contains possible infinite loops.
-- plugins/nrlint-plugin-func-style-eslint
-  - flow linter plugin to check JavaScript coding style in function node.
-    - currently, Editor integration is not yet supported. 
+    - checking whether a function node has a name.
+    - checking whether each http-in node has corresponding http-response, and vice versa.
+    - checking whether a flow contains possible infinite loops.
+- nrlint-plugin-func-style-eslint
+  - rule plugin for checking JavaScript coding style in function node.
 
 ## Usage
 
@@ -23,11 +22,9 @@ This repository contains following 3 modules.
 ```
  % git clone https://github.com/node-red/nrlint.git
 ```
-- install nrlint and plugin
+- install nrlint (and included plugins)
 ```
  % npm install -g /path/to/nrlint
- % npm install -g /path/to/nrlint-plugin-func-style-eslint
- % npm install -g /path/to/nrlint-plugin-core
  ...
 ```
 - add lint configuration to $HOME/.nrlintrc.js
@@ -65,7 +62,7 @@ module.exports = {
   ]
 }
 ```
-- set module path to environment variable NODE_PATH
+- (if you are using nvm) set module path to environment variable NODE_PATH
 ```
  % export NODE_PATH=$(npm root -g)
 ```
@@ -81,11 +78,10 @@ module.exports = {
 ```
  % git clone https://github.com/node-red/nrlint.git
 ```
-- install nrlint and plugin
+- install nrlint 
 ```
  % cd $HOME/.node-red
  % npm install /path/to/nrlint
- % npm install /path/to/nrlint-plugin-core
 ```
 - add lint configuration to $HOME/settings.js
 ```
@@ -121,10 +117,4 @@ module.exports = {
 ```
 - Then, lint tab (marked with a paw) will be appeared.
 
-## Limitation
-- Only following rule can use from editor:
-  - no-func-name
-  - flowsize
-  - http-in-resp
-  - loop
   
