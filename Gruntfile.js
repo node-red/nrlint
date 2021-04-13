@@ -65,7 +65,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-eslint');
     grunt.loadNpmTasks('grunt-jsdoc');
     grunt.loadNpmTasks('grunt-npm-command');
-    grunt.registerTask('default', ['eslint','npm-command','nyc:all']);
+    grunt.registerTask('default', ['npm-command','eslint','nyc:all']);
     grunt.registerTask('test', ['simplemocha:all']);
     grunt.registerTask('doc', ['jsdoc']);
     grunt.registerTask('coverage', ['nyc:all'])
