@@ -23,7 +23,6 @@ This repository contains following submodules.
  % git clone https://github.com/node-red/nrlint.git
  % cd nrlint
  % npm install
- % grunt
 
 ```
 - install nrlint (and included plugins)
@@ -83,7 +82,6 @@ module.exports = {
  % git clone https://github.com/node-red/nrlint.git
  % cd nrlint
  % npm install
- % grunt
 ```
 - install nrlint 
 ```sh
