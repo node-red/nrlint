@@ -3,106 +3,209 @@ Node-RED Flow Linter
 
 _**WORK IN PROGRESS.  Current code is aimed for investigating architecture of flow linter.**_ 
 
-This repository contains following 5 modules.
+This repository contains following submodules.
 
-- nrlint
-  - main module for Node-RED flow linter.
-- plugins/nrlint-plugin-func-style-eslint
-  - flow linter plugin to check JavaScript coding style in function node.
-- plugins/nrlint-plugin-no-func-name
-  - flow linter plugin to check whether a function node has a name.
-- plugins/nrlint-plugin-http-in-resp
-  - flow linter plugin to check whether each http-in node has corresponding http-response, and vice versa.
-- plugins/nrlint-plugin-loop
-  - flow linter plugin to check whether a flow contains possible infinite loops.
+- nrlint-main
+  -  main plugin, and CLI frontend
+- nrlint-plugin-core
+  - core rule plugin for following: 
+    - checking whether a function node has a name.
+    - checking whether each http-in node has corresponding http-response, and vice versa.
+    - checking whether a flow contains possible infinite loops.
+- nrlint-plugin-func-style-eslint
+  - rule plugin for checking JavaScript coding style in function node.
 
 ## Usage
 
 ### From Command-line
-- clone this repository
-```
+- clone this repository and build nrlint
+```sh
  % git clone https://github.com/node-red/nrlint.git
+ % cd nrlint
+ % npm install
+
 ```
-- install nrlint and plugin
-```
+- install nrlint (and included plugins)
+```sh
  % npm install -g /path/to/nrlint
- % npm install -g /path/to/nrlint-plugin-func-style-eslint
- % npm install -g /path/to/nrlint-plugin-no-func-name
  ...
 ```
 - add lint configuration to $HOME/.nrlintrc.js
-```
+```js
 module.exports = {
-  "rules": [
+  rules: [
     {
-      "name": "no-func-name",
-      "mode": "warn",
+      name: "core",
+      subrules: [
+        {
+          name: "flowsize",
+          maxSize: 10
+        },
+        {
+          name: "no-func-name",
+          severity: "warn",
+        },
+        {
+          name: "http-in-resp"
+        },
+        {
+          name: "loop",
+        },
+      ]
     },
     {
-      "name": "func-style-eslint",
-      "parserOptions": {
-        "ecmaVersion": 6
+      name: "func-style-eslint",
+      parserOptions: {
+        ecmaVersion: 6
       },
-      "rules": {
-        "semi": 2
+      rules: {
+        semi: 2
       }
     },
   ]
 }
 ```
-- set module path to environment variable NODE_PATH
+- (if you are using nvm) set module path to environment variable NODE_PATH
 ```
  % export NODE_PATH=$(npm root -g)
 ```
 
 - run nrlint command
-```
+```sh
  % nrlint /path/to/flow.json
 ```
 
 ### From Node-RED Editor
 
-- clone this repository
-```
+- clone this repository and build nrlint
+```sh
  % git clone https://github.com/node-red/nrlint.git
+ % cd nrlint
+ % npm install
 ```
-- install nrlint and plugin
-```
+- install nrlint 
+```sh
  % cd $HOME/.node-red
  % npm install /path/to/nrlint
- % npm install /path/to/nrlint-plugin-func-style-eslint
- % npm install /path/to/nrlint-plugin-no-func-name
 ```
 - add lint configuration to $HOME/settings.js
-```
+```js
 ...
-    nrlint: {
-      rules: [
-        {
-          "name": "no-func-name",
-          "mode": "warn",
-        },
-        {
-          "name": "func-style-eslint",
-          "parserOptions": {
-            "ecmaVersion": 6
+  nrlint: {
+    rules: [
+      {
+        name: "core",
+        subrules: [
+          {
+            name: "no-func-name",
+            severity: "warn"
           },
-          "rules": {
-            "semi": 2
+          {
+            name: "flowsize",
+            maxSize: 10
+            severity: "error"
+          },
+          {
+            name: "http-in-resp",
+            severity: "warn"
+          },
+          {
+            name: "loop",
+            severity: "warn"
           }
+        ]
+      },
+      {
+        name: "func-style-eslint",
+        parserOptions: {
+          ecmaVersion: 6
+        },
+        rules: {
+          semi: 2
         }
-      ]
-    }
+      },
+    ]
+  }
 ...
 ```
 - run Node-RED
-```
+```sh
  % npm start
 ```
 - Then, lint tab (marked with a paw) will be appeared.
 
-## Limitation
-- Only following rule can use from editor:
-  - no-func-name
-  - func-style-eslint
-  - flowsize
+## Configuration
+
+Configuration has the following structure:
+```js
+rules: [
+  {
+    name: "NAME_OF_RULE",
+    severity: "(error|warn)"
+    other_setting_key: "OTHER_SETTING_VALUE"
+  },
+  //...
+]
+```
+### `core` plugin
+
+The core plugin contains multiple rules, so you can configure each rule in `subrules` array.
+`subrules` array have the same structure as `rules`.
+
+#### rule `no-func-name`
+This rule checks an existence of name of a function node.
+```js
+{
+  name: "no-func-name",
+  severity: "warn"
+}
+```
+- `severity`: rule severity
+
+#### rule `flowsize`
+This rule checks a size of each flow (a.k.a tab, workspace).
+```js
+{
+  name: "flowsize",
+  severity: "warn",
+  maxSize: 100
+}
+```
+- `severity`: rule severity
+- `maxSize`: if number of nodes in a flow exceeded this value, warning or error will emit.
+
+#### rule `http-in-resp`
+This rule checks whether an HTTP-in node has corresponding HTTP-response node (or vice versa).
+```js
+{
+  name: "http-in-resp",
+  severity: "warn"
+}
+```
+- `severity`: rule severity
+
+#### rule `loop`
+This rule checks possibility of infinite loops in a flow.
+```js
+{
+  name: "loop",
+  severity: "warn"
+}
+```
+- `severity`: rule severity
+
+### `func-style-eslint` plugin
+This rule checks coding style in a function nodes.
+```js
+{
+  name: "func-style-eslint"
+  parserOptions: {
+    ecmaVersion: 6
+  },
+  rules: {
+    semi: 2
+  }
+}
+```
+- `parserOptions`, `rules` etc.: ESLint configuration parameters.  See [ESLint documentation](https://eslint.org/docs/user-guide/configuring/)
+

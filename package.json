@@ -2,12 +2,26 @@
   "name": "nrlint",
   "version": "0.0.1",
   "description": "Flow linter for Node-RED",
+  "homepage": "https://github.com/node-red/nrlint",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/node-red/nrlint.git"
+  },
+  "bugs": {
+    "url": "https://github.com/node-red/nrlint/issues"
+  },
   "main": "index.js",
   "private": true,
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt test",
+    "prepare": "cd packages/node_modules/nrlint-plugin-func-style-eslint; npm install"
   },
-  "keywords": [],
+  "keywords": [
+    "node-red",
+    "plugin",
+    "nrlint",
+    "lint"
+  ],
   "contributors": [
     {
       "name": "Kunihiko Toumura"
@@ -15,11 +29,13 @@
   ],
   "license": "Apache-2.0",
   "bin": {
-    "nrlint": "./bin/nrlint.js"
+    "nrlint": "./packages/node_modules/nrlint-main/bin/nrlint.js"
   },
   "node-red": {
-    "nodes": {
-      "nrlint": "nr/nrlint.js"
+    "plugins": {
+      "nrlint": "packages/node_modules/nrlint-main/nr/nrlint.js",
+      "nrlint-plugin-core": "packages/node_modules/nrlint-plugin-core/nr/rule.html",
+      "nrlint-plugin-func-style-eslint": "packages/node_modules/nrlint-plugin-func-style-eslint/nr/rule.html"
     }
   },
   "engines": {
@@ -27,19 +43,20 @@
   },
   "devDependencies": {
     "chai": "*",
-    "eslint": "^6.8.0",
-    "eslint-plugin-import": "^2.20.1",
-    "eslint-plugin-node": "^11.0.0",
-    "grunt": "^1.0.4",
-    "grunt-eslint": "^22.0.0",
-    "grunt-mocha-istanbul": "^5.0.2",
+    "eslint": "^7.24.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "grunt": "^1.3.0",
+    "grunt-eslint": "^23.0.0",
+    "grunt-jsdoc": "^2.4.1",
+    "grunt-npm-command": "^0.1.2",
     "grunt-simple-mocha": "^0.4.1",
-    "istanbul": "^0.4.5",
-    "mocha": "*",
-    "nyc": "^15.0.0"
+    "grunt-simple-nyc": "^3.0.1",
+    "mocha": "^8.3.2",
+    "nyc": "^15.1.0"
   },
   "dependencies": {
     "clone": "^2.1.2",
-    "nopt": "^4.0.1"
+    "nopt": "^5.0.0"
   }
 }
