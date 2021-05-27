@@ -24,7 +24,7 @@
         "webpack-cli": "^4.7.0"
     },
     "dependencies": {
-        "@node-red/flow-parser": "file:../flow-parser",
+        "@node-red/flow-parser": "node-red/flow-parser",
         "eslint": "^7.27.0",
         "eslint4b": "^7.24.0",
         "nopt": "^5.0.0",
