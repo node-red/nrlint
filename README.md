@@ -31,7 +31,7 @@ by a comma (`,`).
 ```
 module.exports {
     // Add a `nrlint` entry pointing to your nrlint config file
-    nrlint: require("./nrlintrc.js"),
+    nrlint: require("./.nrlintrc.js"),
 }
 ```
 
