@@ -1,210 +1,113 @@
-# nrlint
-Node-RED Flow Linter
+# nrlint - Node-RED Flow Linter
 
-_**WORK IN PROGRESS.  Current code is aimed for investigating architecture of flow linter.**_
+nrlint is a linting tool for identifying potential problems with Node-RED flows.
 
-This repository contains following submodules.
+It can be used within the Node-RED editor or run as a command-line tool.
 
-- nrlint-main
-  -  main plugin, and CLI frontend
-- nrlint-plugin-core
-  - core rule plugin for following:
-    - checking whether a function node has a name.
-    - checking whether each http-in node has corresponding http-response, and vice versa.
-    - checking whether a flow contains possible infinite loops.
-- nrlint-plugin-func-style-eslint
-  - rule plugin for checking JavaScript coding style in function node.
+## Installation and Usage
 
-## Usage
+**This is under active development and has not yet been published to npm. Follow
+the [Developing](#developing) instructions to get started.**
 
-### From Command-line
-- clone this repository and build nrlint
-```sh
- % git clone https://github.com/node-red/nrlint.git
- % cd nrlint
- % npm install
+
+### In the editor
+
+In your Node-RED user directory (typically `~/.node-red`), run:
 
 ```
-- install nrlint (and included plugins)
-```sh
- % npm install -g /path/to/nrlint
- ...
+npm install nrlint
 ```
-- add lint configuration to $HOME/.nrlintrc.js
-```js
-module.exports = {
-  rules: [
-    {
-      name: "core",
-      subrules: [
-        {
-          name: "flowsize",
-          maxSize: 10
-        },
-        {
-          name: "no-func-name",
-          severity: "warn",
-        },
-        {
-          name: "http-in-resp"
-        },
-        {
-          name: "loop",
-        },
-      ]
-    },
-    {
-      name: "func-style-eslint",
-      parserOptions: {
-        ecmaVersion: 6
-      },
-      rules: {
-        semi: 2
-      }
-    },
-  ]
+
+You can then generate a default configuration file with:
+
+```
+npx nrlint --init > .nrlintrc.js
+```
+
+Edit your Node-RED settings file, `~/.node-red/settings.js` and add the follow
+inside the `module.exports` block. Remember, each entry in the block must be separated
+by a comma (`,`).
+
+```
+module.exports {
+    // Add a `nrlint` entry pointing to your nrlint config file
+    nrlint: require("./nrlintrc.js"),
 }
 ```
-- (if you are using nvm) set module path to environment variable NODE_PATH
+
+Finally, restart Node-RED.
+
+In the editor you will now have a linter sidebar available. It will report
+any warnings or errors the linter detects whilst you edit your flows.
+
+The cog icon at the top of the sidebar allows you to customise your linter configuration.
+Note that doing so will not modify the `.nrlintrc.js` file you created - the new
+configuration will be stored in the editor preferences.
+
+### Command-line usage
+
+You can run nrlint as a command line tool to lint a local json flow file.
+
+Following the instructions above to install nrlint. You can then run it from the
+`~/.node-red` directory using `npx`:
+
 ```
- % export NODE_PATH=$(npm root -g)
+npx nrlint myFlowFile.json
 ```
 
-- run nrlint command
-```sh
- % nrlint /path/to/flow.json
+Run with `--help` to see the available options.
+
+
+## Developing
+
+To use the development version of nrlint you can clone its source code repository
+and build it yourself.
+
+1. Get the source code
+
+```
+git clone https://github.com/node-red/nrlint.git
 ```
 
-### From Node-RED Editor
+2. Install the dependencies
 
-- clone this repository and build nrlint
-```sh
- % git clone https://github.com/node-red/nrlint.git
- % cd nrlint
- % npm install
 ```
-- install nrlint
-```sh
- % cd $HOME/.node-red
- % npm install /path/to/nrlint
+cd nrlint
+npm install
 ```
-- add lint configuration to $HOME/settings.js
-```js
-...
-  nrlint: {
-    rules: [
-      {
-        name: "core",
-        subrules: [
-          {
-            name: "no-func-name",
-            severity: "warn"
-          },
-          {
-            name: "flowsize",
-            maxSize: 10,
-            severity: "error"
-          },
-          {
-            name: "http-in-resp",
-            severity: "warn"
-          },
-          {
-            name: "loop",
-            severity: "warn"
-          }
-        ]
-      },
-      {
-        name: "func-style-eslint",
-        parserOptions: {
-          ecmaVersion: 6
-        },
-        rules: {
-          semi: 2
-        }
-      },
-    ]
-  }
-...
-```
-- run Node-RED
-```sh
- % npm start
-```
-- Then, lint tab (marked with a paw) will be appeared.
 
-## Configuration
+3. Build the plugin
 
-Configuration has the following structure:
-```js
-rules: [
-  {
-    name: "NAME_OF_RULE",
-    severity: "(error|warn)"
-    other_setting_key: "OTHER_SETTING_VALUE"
-  },
-  //...
-]
 ```
-### `core` plugin
-
-The core plugin contains multiple rules, so you can configure each rule in `subrules` array.
-`subrules` array have the same structure as `rules`.
-
-#### rule `no-func-name`
-This rule checks an existence of name of a function node.
-```js
-{
-  name: "no-func-name",
-  severity: "warn"
-}
+npm run build
 ```
-- `severity`: rule severity
 
-#### rule `flowsize`
-This rule checks a size of each flow (a.k.a tab, workspace).
-```js
-{
-  name: "flowsize",
-  severity: "warn",
-  maxSize: 100
-}
-```
-- `severity`: rule severity
-- `maxSize`: if number of nodes in a flow exceeded this value, warning or error will emit.
+4. Install into Node-RED
 
-#### rule `http-in-resp`
-This rule checks whether an HTTP-in node has corresponding HTTP-response node (or vice versa).
-```js
-{
-  name: "http-in-resp",
-  severity: "warn"
-}
 ```
-- `severity`: rule severity
+cd ~/.node-red
+npm install <path-to-nrlint-directory>
+```
 
-#### rule `loop`
-This rule checks possibility of infinite loops in a flow.
-```js
-{
-  name: "loop",
-  severity: "warn"
-}
-```
-- `severity`: rule severity
+5. Restart Node-RED to load the linter.
 
-### `func-style-eslint` plugin
-This rule checks coding style in a function nodes.
-```js
-{
-  name: "func-style-eslint"
-  parserOptions: {
-    ecmaVersion: 6
-  },
-  rules: {
-    semi: 2
-  }
-}
-```
-- `parserOptions`, `rules` etc.: ESLint configuration parameters.  See [ESLint documentation](https://eslint.org/docs/user-guide/configuring/)
+### Source code structure
+
+ - `bin` - CLI executable
+ - `lib` - main source code of the linter
+   - `cli` - source code of the CLI
+     - `formatters` - source code of the output formatters used by the CLI version
+   - `rules` - source code of the built-in rules
+     - `function-eslint` - source code of the built-in function-eslint rule.
+ - `scripts` - build scripts used by `npm run build`
+ - `src` - source code of the plugins
+
+After `npm run build` is run, the following directories will be created:
+
+ - `dist` - contains the built plugin files
+ - `resources` contains the built Worker files
+
+
+## Acknowledgements
+
+nrlint is modelled after [eslint](https://eslint.org/) and borrows many of its concepts.

@@ -1,8 +1,6 @@
 resources
+dist
 node_modules
-!packages/node_modules
 package-lock.json
 .nyc_output
-coverage
-doc
 .vscode
