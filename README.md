@@ -1,14 +1,14 @@
 # nrlint
 Node-RED Flow Linter
 
-_**WORK IN PROGRESS.  Current code is aimed for investigating architecture of flow linter.**_ 
+_**WORK IN PROGRESS.  Current code is aimed for investigating architecture of flow linter.**_
 
 This repository contains following submodules.
 
 - nrlint-main
   -  main plugin, and CLI frontend
 - nrlint-plugin-core
-  - core rule plugin for following: 
+  - core rule plugin for following:
     - checking whether a function node has a name.
     - checking whether each http-in node has corresponding http-response, and vice versa.
     - checking whether a flow contains possible infinite loops.
@@ -83,7 +83,7 @@ module.exports = {
  % cd nrlint
  % npm install
 ```
-- install nrlint 
+- install nrlint
 ```sh
  % cd $HOME/.node-red
  % npm install /path/to/nrlint
@@ -102,7 +102,7 @@ module.exports = {
           },
           {
             name: "flowsize",
-            maxSize: 10
+            maxSize: 10,
             severity: "error"
           },
           {
@@ -208,4 +208,3 @@ This rule checks coding style in a function nodes.
 }
 ```
 - `parserOptions`, `rules` etc.: ESLint configuration parameters.  See [ESLint documentation](https://eslint.org/docs/user-guide/configuring/)
-

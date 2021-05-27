@@ -1,32 +1,20 @@
 module.exports = {
-    "rules": [
-        {
-            name: "core",
-            subrules: [
-                {
-                    name: "flowsize",
-                    maxSize: 10
-                },
-                {
-                    name: "no-func-name",
-                    mode: "warn",
-                },
-                {
-                    name: "http-in-resp"
-                },
-                {
-                    name: "loop",
-                },                
-            ]
-        },
-        {
-            name: "func-style-eslint",
+    plugins: [
+        "nrlint-plugin-core",
+        "nrlint-plugin-func-style-eslint"
+    ],
+    rules: {
+        "avoid-loops": true,
+        "flow-size": { maxSize: 6 },
+        "function-eslint": {
             parserOptions: {
                 ecmaVersion: 6
             },
             rules: {
                 semi: 2
             }
-        }
-    ]
+        },
+        "http-in-response": true,
+        "named-functions": true
+    }
 };
