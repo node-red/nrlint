@@ -39,6 +39,8 @@
     .red-ui-nrlint-result-meta {
         color: var(--red-ui-secondary-text-color);
         font-size: 11px;
+        display: flex;
+        padding-left: 10px;
     }
     .red-ui-nrlint-result-message {
         color: var(--red-ui-primary-text-color);
@@ -249,7 +251,7 @@
                 if (!lintTimer) {
                     lintTimer = setTimeout(function() {
                         lintTimer = null;
-                        lintWorker.postMessage({cmd:'lint', config: getLintSettings(), flow:RED.nodes.createCompleteNodeSet()})
+                        lintWorker.postMessage({cmd:'lint', config: getLintSettings(), flow:RED.nodes.createCompleteNodeSet({dimensions:true})})
                     },1000);
                 }
             }
@@ -335,6 +337,7 @@
                 addButton: false,
                 height: 'auto',
                 addItem: function(row,index,item) {
+                    item.location.sort();
                     var nodeId = item.location[0];
                     row.on("mouseenter", function(evt) {
                         item.location.forEach(function(id) {
@@ -362,18 +365,31 @@
                         row.addClass("red-ui-nrlint-result-error");
                     }
                     var metaRow = $('<div class="red-ui-nrlint-result-meta"></div>').appendTo(row);
-                    var srcLink = $('<a href="#"></a>').css({
-                        "display":"flex",
-                        "align-items":"center"
-                    }).appendTo(metaRow).on("click", function(evt) {
-                        evt.preventDefault();
-                        RED.view.reveal(nodeId);
+                    var locationLength = Math.min(item.location.length,5);
+                    item.location.forEach(function(nodeId,i) {
+                        if (i >= locationLength) {
+                            return;
+                        }
+                        var srcLink = $('<a href="#"></a>').css({
+                            "display":"flex",
+                            "align-items":"center",
+                            "margin-top":Math.max(-10,(locationLength-1-i)*-2)+"px",
+                            "margin-left":"-8px"
+                        }).appendTo(metaRow).on("click", function(evt) {
+                            evt.preventDefault();
+                            RED.view.reveal(nodeId);
+                        });
+
+
+                        var srcNode = RED.nodes.node(nodeId) ||  RED.nodes.subflow(nodeId)  ||  RED.nodes.group(nodeId) || RED.nodes.workspace(nodeId);
+                        if (srcNode) {
+                            RED.utils.createNodeIcon(srcNode, i === locationLength-1).appendTo(srcLink).addClass("red-ui-node-icon-small");
+                        } else {
+                            $('<span>').addClass('red-ui-node-label').text(nodeId).appendTo(srcLink);
+                        }
                     });
-                    var srcNode = RED.nodes.node(nodeId) ||  RED.nodes.subflow(nodeId)  ||  RED.nodes.group(nodeId) || RED.nodes.workspace(nodeId);
-                    if (srcNode) {
-                         RED.utils.createNodeIcon(srcNode, true).appendTo(srcLink).addClass("red-ui-node-icon-small");
-                    } else {
-                        $('<span>').addClass('red-ui-node-label').text(nodeId).appendTo(srcLink);
+                    if (locationLength < item.location.length) {
+                        $('<span>').addClass('red-ui-node-label').text("+"+(item.location.length-locationLength)).appendTo(metaRow);
                     }
                     var el = $('<div class="red-ui-nrlint-result-message"></div>').text(item.message).appendTo(row);
                 }
