@@ -13,7 +13,8 @@
     "node-red": {
         "plugins": {
             "nrlint": "dist/nrlint-core.js",
-            "nrlint-rules": "dist/nrlint-rules.html"
+            "nrlint-rules": "dist/nrlint-rules.html",
+            "nrlint-rules-eslint": "dist/nrlint-rules-function-eslint.html"
         }
     },
     "devDependencies": {

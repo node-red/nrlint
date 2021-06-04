@@ -53,6 +53,7 @@
         left: 0;
         bottom: 0;
         overflow-y: scroll;
+        padding: 8px 20px 20px;
     }
     #red-ui-settings-tab-nrlint .red-ui-editableList {
     }
@@ -60,24 +61,34 @@
         border: none;
         border-radius: 0;
     }
-    .red-ui-nrlint-rule-config {
+    #red-ui-settings-tab-nrlint .red-ui-editableList-container {
+        padding: 0;
+    }
+    .red-ui-nrlint-setting-row {
         display: flex;
         align-items: start;
     }
-    .red-ui-nrlint-rule-config.disabled .red-ui-nrlint-rule-name {
+    .red-ui-nrlint-settings .red-ui-nrlint-setting-row {
+        padding: 10px 0;
+    }
+    .red-ui-nrlint-settings .red-ui-nrlint-rule-opt {
+        margin-top: 8px;
+    }
+    .red-ui-nrlint-setting-row.disabled .red-ui-nrlint-rule-name {
         color: var(--red-ui-secondary-text-color-disabled-active);
     }
-    .red-ui-nrlint-rule-config.disabled label,
-    .red-ui-nrlint-rule-config.disabled .red-ui-nrlint-rule-meta {
+    #red-ui-settings-tab-nrlint .disabled label,
+    #red-ui-settings-tab-nrlint .disabled .red-ui-nrlint-rule-meta {
         color: var(--red-ui-secondary-text-color-disabled);
     }
 
 
-    .red-ui-nrlint-rule-config > input[type="checkbox"] {
+    .red-ui-nrlint-setting-row > input[type="checkbox"] {
         flex-grow: 0;
-        width: 30px;
+        width: auto;
+        margin-right: 10px;
     }
-    .red-ui-nrlint-rule-config  > div {
+    .red-ui-nrlint-setting-row  > div {
         flex-grow: 1;
     }
     .red-ui-nrlint-rule-meta {
@@ -85,25 +96,30 @@
         color: var(--red-ui-secondary-text-color);
         margin-bottom: 3px;
     }
-    label.red-ui-nrlint-rule-name {
+    .red-ui-nrlint-setting-row label {
         margin: 0;
     }
 
-    .red-ui-nrlint-rule-opts label {
-        margin: 0;
-        line-height: 26px;
+    .red-ui-nrlint-rule-opt {
+        display: flex;
+        align-items: center;
     }
-    .red-ui-nrlint-rule-opts input[type="text"] {
+    .red-ui-nrlint-rule-opt label {
+        line-height: 26px;
+        min-width: 75px;
+    }
+    .red-ui-nrlint-rule-opt input[type="text"]:not(.red-ui-typedInput-input) {
         padding: 3px 3px;
         height: 26px;
         line-height: 26px;
         margin: 0 0 0 6px;
+        flex-grow: 1;
     }
-    .red-ui-nrlint-rule-opts label {
-        display: flex;
-        align-items: center;
+    .red-ui-nrlint-rule-opt .red-ui-typedInput-container {
+        margin: 0 0 0 6px;
+        flex-grow: 1;
     }
-    .red-ui-nrlint-rule-opts input[type="checkbox"] {
+    .red-ui-nrlint-rule-opt input[type="checkbox"] {
         margin: 0 6px 0 0;
     }
 
@@ -128,12 +144,48 @@
     var settingsPane;
 
     function getSettingsPane() {
-        var pane = $('<div id="red-ui-settings-tab-nrlint"></div>');
+        var pane = $('<div id="red-ui-settings-tab-nrlint" class="red-ui-help"></div>');
+
+        var headerOptions = $('<div class="red-ui-nrlint-settings"></div>').appendTo(pane);
+        $('<h3>Settings</h3>').appendTo(headerOptions);
+
+        var autoRow = $('<div class="red-ui-nrlint-setting-row"></div>').appendTo(headerOptions);
+        var autoLint = $('<input type="checkbox" id="red-ui-nrlint-setting-autoLint">').appendTo(autoRow).on('change', function() {
+            var state = this.checked;
+            autoRow.toggleClass("disabled", !state);
+            autoDelayLint.prop("disabled",!state);
+        });
+        var autoOptions = $('<div>').appendTo(autoRow);
+        $('<label for="red-ui-nrlint-setting-autoLint">').text("Automatically lint after any change").appendTo(autoOptions);
+        var autoDelayOptions = $('<div class="red-ui-nrlint-rule-opt">').appendTo(autoOptions);
+        var autoDelayLabel = $('<label for="red-ui-nrlint-setting-autoDelay">').text("Delay").appendTo(autoDelayOptions);
+        var autoDelayLint = $('<input type="text" id="red-ui-nrlint-setting-autoDelay" placeholder="Default: 1000">').appendTo(autoDelayLabel);
+
+
+        $('<h3>Rules</h3>').appendTo(headerOptions);
+
+        var defaultToolbar = $('<div style="position:relative"></div>').appendTo(headerOptions);
+
+        $('<button type="button" class="red-ui-button red-ui-button-small">Use defaults</button>').appendTo(defaultToolbar).on('click', function(evt) {
+            evt.preventDefault();
+            var defaultSettings = RED.settings.nrlint || {rules: {}};
+            var ruleSettings = defaultSettings.rules || {};
+            ruleList.editableList('empty');
+            var linterRuleNames = Object.keys(linterRules);
+            linterRuleNames.sort();
+            linterRuleNames.forEach(function(name) {
+                ruleList.editableList('addItem',{name:name,config:ruleSettings[name],meta:linterRules[name]})
+            })
+        }).css({
+            position: "absolute",
+            right: 0,
+            bottom: "10px"
+        })
         var ruleList = $('<ol id="red-ui-nrlint-rules"></ol>').appendTo(pane).editableList({
             height: 'auto',
             addButton: false,
             addItem: function(row, index, item) {
-                row.addClass('red-ui-nrlint-rule-config');
+                row.addClass('red-ui-nrlint-setting-row');
                 item.ui = {};
                 var activeCB = $('<input type="checkbox" id="nrlint-rule-active--'+item.name+'">')
                     .appendTo(row)
@@ -144,14 +196,18 @@
                 var info = $('<div></div>').appendTo(row);
                 item.ui.active = function(state) {
                     if (state === undefined) {
-                        return activeCB.prop('checked');
+                        return !!activeCB.prop('checked');
                     } else {
                         activeCB.prop('checked', !!state);
                         row.toggleClass("disabled", !state);
                         if (item.meta.options) {
                             var optNames = Object.keys(item.meta.options);
                             optNames.forEach(function(opt) {
-                                item.meta.options[opt].input.prop("disabled",!state);
+                                if (item.meta.options[opt].typedInput) {
+                                    item.meta.options[opt].input.typedInput("disable",!state);
+                                } else {
+                                    item.meta.options[opt].input.prop("disabled",!state);
+                                }
                             });
                         }
                     }
@@ -163,27 +219,55 @@
                 if (item.meta.options) {
                     var optionList = $('<div class="red-ui-nrlint-rule-opts"></div>').appendTo(info);
                     var optNames = Object.keys(item.meta.options);
-                    optNames.forEach(function(opt) {
+                    optNames.forEach(function(opt,i) {
                         item.ui.options[opt] = {};
                         var optProperties = item.meta.options[opt];
-                        var optRow = $('<div></div>').appendTo(optionList);
-                        var label = $('<label></label>').text(opt).appendTo(optRow);
+                        var optRow = $('<div class="red-ui-nrlint-rule-opt"></div>').appendTo(optionList);
+                        var inputID = "red-ui-nrlint-rule--"+item.name+"-opt-"+i;
+                        var label = $('<label></label>',{for:inputID}).text(opt).appendTo(optRow);
                         if (optProperties.type === 'boolean') {
-                            var checkbox = $('<input type="checkbox">').prependTo(label);
+                            var checkbox = $('<input type="checkbox">',{id:inputID}).prependTo(optRow);
                             item.meta.options[opt].input = checkbox;
                             item.ui.options[opt].val = function() {
                                 return checkbox.prop("checked");
                             };
                         } else {
-                            var input = $('<input type="text">').appendTo(label);
-                            if (optProperties.hasOwnProperty("default")) {
-                                input.attr("placeholder",optProperties.default);
-                            }
-                            if (item.config && item.config[opt]) {
-                                input.val(item.config[opt]);
+                            var input = $('<input type="text">',{id:inputID}).appendTo(optRow);
+                            if (optProperties.type === 'object') {
+                                var oldValue = "";
+                                if (item.config && item.config[opt]) {
+                                    oldValue = item.config[opt];
+                                    input.val(JSON.stringify(item.config[opt]));
+                                } else if (optProperties.hasOwnProperty("default")) {
+                                    input.val(JSON.stringify(optProperties.default));
+                                    oldValue = optProperties.default;
+                                }
+                                item.meta.options[opt].typedInput = input;
+                                input.typedInput({types:['json']})
+                                item.ui.options[opt].val = function() {
+                                    try {
+                                        var v = input.val();
+                                        if (v === JSON.stringify(optProperties.default)) {
+                                            return "";
+                                        }
+                                        return JSON.parse(input.val())
+                                    } catch(err) {
+                                        if (oldValue === optProperties.default) {
+                                            return "";
+                                        }
+                                        return oldValue;
+                                    }
+                                }
+                            } else {
+                                if (item.config && item.config[opt]) {
+                                    input.val(item.config[opt]);
+                                }
+                                if (optProperties.hasOwnProperty("default")) {
+                                    input.attr("placeholder",optProperties.default);
+                                }
+                                item.ui.options[opt].val = function() { return input.val() };
                             }
                             item.meta.options[opt].input = input;
-                            item.ui.options[opt].val = function() { return input.val() };
 
                         }
                     });
@@ -195,6 +279,14 @@
         var linterRuleNames = Object.keys(linterRules);
         linterRuleNames.sort();
         var currentSettings = getLintSettings();
+        if (!currentSettings.hasOwnProperty('auto')) {
+            currentSettings.auto = true;
+        }
+        autoLint.prop('checked', !!currentSettings.auto).trigger("change");
+        if (currentSettings.autoDelay) {
+            autoDelayLint.val(currentSettings.autoDelay);
+        }
+
         var ruleSettings = currentSettings.rules || {};
         linterRuleNames.forEach(function(name) {
             ruleList.editableList('addItem',{name:name,config:ruleSettings[name],meta:linterRules[name]})
@@ -248,12 +340,20 @@
             // Called to request a new lint run. Throttles requests to max 1/s
             var lintTimer;
             function queueLint() {
-                if (!lintTimer) {
-                    lintTimer = setTimeout(function() {
-                        lintTimer = null;
-                        lintWorker.postMessage({cmd:'lint', config: getLintSettings(), flow:RED.nodes.createCompleteNodeSet({dimensions:true})})
-                    },1000);
+                if (RED.settings.get("nrlint.auto",true)) {
+                    if (!lintTimer) {
+                        lintTimer = setTimeout(function() {
+                            triggerLint();
+                        },RED.settings.get("nrlint.autoDelay")||1000);
+                    }
                 }
+            }
+            function triggerLint() {
+                if (lintTimer) {
+                    clearTimeout(lintTimer);
+                }
+                lintTimer = null;
+                lintWorker.postMessage({cmd:'lint', config: getLintSettings(), flow:RED.nodes.createCompleteNodeSet({dimensions:true})})
             }
 
             // Lint Settings Panel
@@ -263,6 +363,16 @@
                 get: getSettingsPane,
                 close: function() {
                     var ruleSettings = {};
+                    var settings = { rules: ruleSettings};
+
+                    settings.auto = !!$("#red-ui-nrlint-setting-autoLint").prop("checked");
+                    var autoDelay = parseInt($("#red-ui-nrlint-setting-autoDelay").val());
+                    if (settings.auto && !isNaN(autoDelay) && autoDelay !== 1000) {
+                        settings.autoDelay = autoDelay;
+                    } else {
+                        settings.autoDelay = null;
+                    }
+
                     $("#red-ui-nrlint-rules").editableList("items").each(function() {
                         var rule = $(this).data('data');
                         if (!rule.ui.active()) {
@@ -284,12 +394,13 @@
                             }
                         }
                     })
-                    RED.settings.set("nrlint",{ rules: ruleSettings });
-                    queueLint();
+                    RED.settings.set("nrlint",settings);
+                    triggerLint();
                 }
             })
 
             function displayResult(result) {
+                $("#red-ui-nrlint-refresh").prop('disabled',false);
                 var warnCount = 0;
                 var errCount = 0;
                 resultList.editableList('empty');
@@ -324,13 +435,15 @@
             var statusHeader = $('<span>',{class:"red-ui-nrlint-status"}).appendTo(headerLeftSpan);
             var headerRightSpan = $('<span>',{class:""}).appendTo(header);
 
+            $('<button type="button" id="red-ui-nrlint-refresh" class="red-ui-sidebar-header-button"><i class="fa fa-refresh"/></button>').appendTo(headerRightSpan).on("click", function(evt) {
+                evt.preventDefault();
+                resultList.editableList('empty');
+                $(this).prop('disabled',true);
+                triggerLint();
+            });
             $('<button type="button" class="red-ui-sidebar-header-button"><i class="fa fa-cog"/></button>').appendTo(headerRightSpan).on("click", function(evt) {
                 evt.preventDefault();
                 RED.userSettings.show("nrlint")
-            });
-            $('<button type="button" class="red-ui-sidebar-header-button"><i class="fa fa-trash"/></button>').appendTo(headerRightSpan).on("click", function(evt) {
-                evt.preventDefault();
-                resultList.editableList('empty');
             });
 
             var resultList = $('<ol>',{class:"red-ui-nrlint-results"}).appendTo(listContainer).editableList({
