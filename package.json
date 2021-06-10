@@ -22,6 +22,14 @@
         "build": "npm run build-workers && node scripts/build.js",
         "build-workers": "webpack -c ./webpack.config.js"
     },
+    "files": [
+        "lib",
+        "dist",
+        "resources",
+        "!src",
+        "!scripts",
+        "!webpack.config.js"
+    ],
     "node-red": {
         "plugins": {
             "nrlint": "dist/nrlint-core.js",
