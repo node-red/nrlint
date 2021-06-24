@@ -144,7 +144,14 @@
         display: none;
     }
 
-
+    .red-ui-nrlint-annotation {
+        stroke: var(--red-ui-node-status-error-border);
+        fill: var(--red-ui-border-color-warning);
+    }
+    .red-ui-nrlint-annotation-label {
+        stroke: var(--red-ui-node-label-color);
+        stroke-width: 2;
+    }
 </style>
 <script>
 (function() {
@@ -347,6 +354,30 @@
                     }
             });
 
+            if (RED.view.annotations) {
+                RED.view.annotations.register("red-ui-nrlint",{
+                    type: 'badge',
+                    class: "red-ui-nrlint-annotation",
+                    show: "_nrlint_error",
+                    element: function() {
+                        var group = document.createElementNS("http://www.w3.org/2000/svg","g");
+                        group.setAttribute("transform","translate(0,-0.5)")
+                        var badge = document.createElementNS("http://www.w3.org/2000/svg","rect");
+                        badge.setAttribute("width",11);
+                        badge.setAttribute("height",11);
+                        badge.setAttribute("rx",2);
+                        var label = document.createElementNS("http://www.w3.org/2000/svg","path");
+                        label.setAttribute("class","red-ui-nrlint-annotation-label");
+                        label.setAttribute("d","M 5.5 1.5 v 4.5 m 0 1.5 v 2")
+                        group.appendChild(badge)
+                        group.appendChild(label)
+                        return group;
+                    },
+                    tooltip: "linting errors"
+                });
+            }
+
+
             // Called to request a new lint run. Throttles requests to max 1/s
             var lintTimer;
             function queueLint() {
@@ -409,17 +440,34 @@
                 }
             })
 
+            var resultLocations = new Set();
+
             function displayResult(result) {
                 $("#red-ui-nrlint-refresh").prop('disabled',false);
                 var warnCount = 0;
                 var errCount = 0;
+                for (var id of resultLocations) {
+                    var node = RED.nodes.node(id);
+                    if (node) {
+                        delete node._nrlint_error;
+                    }
+                }
+                resultLocations.clear();
                 resultList.editableList('empty');
                 for (var i = 0; i < result.length; i++) {
                     if (result[i].severity === "warn") { warnCount++; }
                     if (result[i].severity === "error") { errCount++; }
+                    result[i].location.forEach(function(id) {
+                        resultLocations.add(id);
+                        var node = RED.nodes.node(id);
+                        if (node) {
+                            node._nrlint_error = (node._nrlint_error || 0) + 1;
+                        }
+                    });
                     resultList.editableList('addItem', result[i])
                 }
                 updateStatus({warn: warnCount, error: errCount});
+                RED.view.redraw();
             }
 
             function updateStatus(opts) {
@@ -461,7 +509,6 @@
                 height: 'auto',
                 addItem: function(row,index,item) {
                     item.location.sort();
-                    var nodeId = item.location[0];
                     row.on("mouseenter", function(evt) {
                         item.location.forEach(function(id) {
                             var n = RED.nodes.node(id);
@@ -710,7 +757,9 @@
             RED.events.on("workspace:dirty", queueLint);
         },
         onremove: function() {
-            //console.log('nrlint:onremove');
+            if (RED.view.annotations) {
+                RED.view.annotations.unregister("red-ui-nrlint");
+            }
         }
     });
 })();
