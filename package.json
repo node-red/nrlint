@@ -45,8 +45,8 @@
         "webpack-cli": "^4.7.0"
     },
     "dependencies": {
+        "@eslint/eslintrc": "^0.4.2",
         "@node-red/flow-parser": "^1.0.0",
-        "eslint": "7.27.0",
         "eslint4b": "7.27.0",
         "nopt": "^5.0.0",
         "table": "^6.7.1"
