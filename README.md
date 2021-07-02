@@ -6,10 +6,6 @@ It can be used within the Node-RED editor or run as a command-line tool.
 
 ## Installation and Usage
 
-**This is under active development and has not yet been published to npm. Follow
-the [Developing](#developing) instructions to get started.**
-
-
 ### In the editor
 
 In your Node-RED user directory (typically `~/.node-red`), run:
