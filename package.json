@@ -1,6 +1,6 @@
 {
     "name": "nrlint",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Linter for Node-RED flows",
     "license": "Apache-2.0",
     "repository": {
