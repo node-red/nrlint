@@ -181,6 +181,10 @@
         var autoDelayLint = $('<input type="text" id="red-ui-nrlint-setting-autoDelay" placeholder="Default: 1000">').appendTo(autoDelayLabel);
 
 
+        var disabledRow = $('<div class="red-ui-nrlint-setting-row"></div>').appendTo(headerOptions);
+        var lintDisabledFlows = $('<input type="checkbox" id="red-ui-nrlint-setting-lintDisabledFlows">').appendTo(disabledRow);
+        $('<label for="red-ui-nrlint-setting-lintDisabledFlows">').text("Lint disabled flows").appendTo(disabledRow);
+
         $('<h3>Rules</h3>').appendTo(headerOptions);
 
         var defaultToolbar = $('<div style="position:relative"></div>').appendTo(headerOptions);
@@ -305,6 +309,10 @@
         if (currentSettings.autoDelay) {
             autoDelayLint.val(currentSettings.autoDelay);
         }
+        if (!currentSettings.hasOwnProperty('lintDisabledFlows')) {
+            currentSettings.lintDisabledFlows = true;
+        }
+        lintDisabledFlows.prop('checked', !!currentSettings.lintDisabledFlows);
 
         var ruleSettings = currentSettings.rules || {};
         linterRuleNames.forEach(function(name) {
@@ -417,6 +425,9 @@
                     } else {
                         settings.autoDelay = null;
                     }
+
+                    settings.lintDisabledFlows = !!$("#red-ui-nrlint-setting-lintDisabledFlows").prop("checked");
+
                     $("#red-ui-nrlint-rules").editableList("items").each(function() {
                         var rule = $(this).data('data');
                         if (!rule.ui.active()) {
