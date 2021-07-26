@@ -67,6 +67,7 @@
     .red-ui-nrlint-setting-row {
         display: flex;
         align-items: start;
+        margin-bottom: 4px;
     }
     .red-ui-nrlint-settings .red-ui-nrlint-setting-row {
         padding: 10px 0;
@@ -103,6 +104,7 @@
     .red-ui-nrlint-rule-opt {
         display: flex;
         align-items: center;
+        margin-bottom: 4px;
     }
     .red-ui-nrlint-rule-opt label {
         line-height: 26px;
@@ -314,14 +316,15 @@
     function getLintSettings() {
         var defaultSettings = RED.settings.nrlint || {rules: {}};
         var userSettings = RED.settings.get("nrlint",defaultSettings);
-        for (var r in userSettings.rules) {
-            if (userSettings.rules.hasOwnProperty(r)) {
-                if (userSettings.rules[r] === true) {
-                    userSettings.rules[r] = {};
+        var settings = JSON.parse(JSON.stringify(userSettings));
+        for (var r in settings.rules) {
+            if (settings.rules.hasOwnProperty(r)) {
+                if (settings.rules[r] === true) {
+                    settings.rules[r] = {};
                 }
             }
         }
-        return userSettings;
+        return settings;
     }
 
 
@@ -403,6 +406,7 @@
                 title: "Linter",
                 get: getSettingsPane,
                 close: function() {
+                    var existingSettings = RED.settings.get("nrlint", {rules:{}});
                     var ruleSettings = {};
                     var settings = { rules: ruleSettings};
 
@@ -413,20 +417,27 @@
                     } else {
                         settings.autoDelay = null;
                     }
-
                     $("#red-ui-nrlint-rules").editableList("items").each(function() {
                         var rule = $(this).data('data');
                         if (!rule.ui.active()) {
                             ruleSettings[rule.name] = "off";
                         } else {
+                            var existingRuleConfig = existingSettings.rules[rule.name];
+                            if (existingRuleConfig === true) {
+                                existingRuleConfig = null;
+                            }
                             var keyCount = 0;
                             ruleSettings[rule.name] = {};
                             for (var opt in rule.ui.options) {
                                 if (rule.ui.options.hasOwnProperty(opt)) {
                                     var v = rule.ui.options[opt].val();
-                                    if (v !== "") {
-                                        ruleSettings[rule.name][opt] = v;
-                                        keyCount++;
+                                    if (v !== "" || (existingRuleConfig && v !== existingRuleConfig[opt])) {
+                                        if (v !== "") {
+                                            ruleSettings[rule.name][opt] = v;
+                                            keyCount++;
+                                        } else {
+                                            ruleSettings[rule.name][opt] = null;
+                                        }
                                     }
                                 }
                             }
