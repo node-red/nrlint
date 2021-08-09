@@ -640,14 +640,17 @@
                                     events: []
                                 }
                                 activeMenuItem.location.forEach(function(id) {
+                                    var flow;
                                     var node = RED.nodes.node(id);
                                     if (node) {
-                                        var flow = RED.nodes.workspace(node.z)||RED.nodes.subflow(node.z);
-                                        if (flow) {
-                                            var event = disableRuleForObject(flow, activeMenuItem.rule);
-                                            if (event) {
-                                                historyEvent.events.push(event);
-                                            }
+                                        flow = RED.nodes.workspace(node.z) || RED.nodes.subflow(node.z);
+                                    } else {
+                                        flow = RED.nodes.workspace(id) || RED.nodes.subflow(id);
+                                    }
+                                    if (flow) {
+                                        var event = disableRuleForObject(flow, activeMenuItem.rule);
+                                        if (event) {
+                                            historyEvent.events.push(event);
                                         }
                                     }
                                 })
@@ -677,8 +680,15 @@
 
                 item.location.forEach(function(id) {
                     var obj = RED.nodes.node(id);
-                    if (obj && obj.g) {
-                        groupOptionDisabled = false;
+                    if (obj) {
+                        if (obj.g) {
+                            groupOptionDisabled = false;
+                        }
+                    } else {
+                        obj = RED.nodes.workspace(id) || RED.nodes.subflow(id);;
+                        if (obj) {
+                            nodeOptionDisabled = true;
+                        }
                     }
                 });
 
