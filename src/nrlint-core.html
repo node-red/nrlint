@@ -573,9 +573,9 @@
                         });
 
 
-                        var srcNode = RED.nodes.node(nodeId) ||  RED.nodes.subflow(nodeId)  ||  RED.nodes.group(nodeId) || RED.nodes.workspace(nodeId);
+                        var srcNode = RED.nodes.node(nodeId) ||  RED.nodes.subflow(nodeId)  ||  RED.nodes.group(nodeId) || RED.nodes.workspace(nodeId) || (RED.nodes.junction && RED.nodes.junction(nodeId));
                         if (srcNode) {
-                            RED.utils.createNodeIcon(srcNode, i === locationLength-1).appendTo(srcLink).addClass("red-ui-node-icon-small");
+                            var nodeIcon = RED.utils.createNodeIcon(srcNode, i === locationLength-1).appendTo(srcLink).addClass("red-ui-node-icon-small");
                         } else {
                             $('<span>').addClass('red-ui-node-label').text(nodeId).appendTo(srcLink);
                         }
