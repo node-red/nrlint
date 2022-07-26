@@ -247,9 +247,14 @@
                         var optProperties = item.meta.options[opt];
                         var optRow = $('<div class="red-ui-nrlint-rule-opt"></div>').appendTo(optionList);
                         var inputID = "red-ui-nrlint-rule--"+item.name+"-opt-"+i;
-                        var label = $('<label></label>',{for:inputID}).text(opt).appendTo(optRow);
+                        var label = $('<label></label>',{for:inputID}).text(optProperties.label || opt).appendTo(optRow);
                         if (optProperties.type === 'boolean') {
-                            var checkbox = $('<input type="checkbox">',{id:inputID}).prependTo(optRow);
+                            var checkbox = $('<input type="checkbox" id="'+inputID+'">').prependTo(optRow);
+                            if (item.config && item.config[opt] !== undefined) {
+                                checkbox.prop('checked', !!item.config[opt])
+                            } else {
+                                checkbox.prop('checked', !!optProperties.default)
+                            }
                             item.meta.options[opt].input = checkbox;
                             item.ui.options[opt].val = function() {
                                 return checkbox.prop("checked");
