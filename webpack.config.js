@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack')
 
 module.exports = [{
     entry: path.resolve(__dirname, 'src/nrlint-worker.js'),
@@ -33,11 +34,17 @@ module.exports = [{
     },
     resolve: {
         fallback: {
-            "assert": path.resolve(__dirname, 'lib/rules/function-eslint/empty.js'),
-            "util":   false,
-            "path":   false
+            "window": false
         }
     },
     mode: 'production',
-    target: ['webworker']
+    target: ['webworker'],
+    plugins: [
+        new webpack.BannerPlugin({
+            raw: true,
+            entryOnly: true,
+            banner:
+              'let window;',
+          })
+    ]
 }];
