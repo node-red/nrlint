@@ -11,6 +11,7 @@ async function copyStaticAssets() {
     const assets = [
         "nrlint-core.html",
         "nrlint-core.js",
+        "locales",
         "nrlint-rules.html",
         "nrlint-rules-function-eslint.html"
     ];
