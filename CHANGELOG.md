@@ -1,3 +1,7 @@
+### 1.2.0
+
+ - Replace eslint4b with eslint-linter-browserify (#39) @knolleary
+
 ### 1.1.0
 
  - Update to flow-parser@1.0.2
