@@ -1,0 +1,16 @@
+{
+    "label": {
+        "settings": "Settings",
+        "autoLint": "Automatically lint after any change",
+        "delay": "Delay (ms)",
+        "default": "Default: 1000",
+        "lintDisabledFlows": "Lint disabled flows",
+        "rules": "Rules",
+        "useDefaults": "Use defaults",
+        "ignoreNode": "Ignore for node",
+        "ignoreGroup": "Ignore for group",
+        "ignoreFlow": "Ignore for flow",
+        "linter": "Linter",
+        "lint": "lint"
+    }
+}

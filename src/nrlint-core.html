@@ -166,7 +166,7 @@
         var pane = $('<div id="red-ui-settings-tab-nrlint" class="red-ui-help"></div>');
 
         var headerOptions = $('<div class="red-ui-nrlint-settings"></div>').appendTo(pane);
-        $('<h3>Settings</h3>').appendTo(headerOptions);
+        $('<h3 data-i18n="nrlint/nrlint:label.settings"></h3>').appendTo(headerOptions);
 
         var autoRow = $('<div class="red-ui-nrlint-setting-row"></div>').appendTo(headerOptions);
         var autoLint = $('<input type="checkbox" id="red-ui-nrlint-setting-autoLint">').appendTo(autoRow).on('change', function() {
@@ -175,21 +175,21 @@
             autoDelayLint.prop("disabled",!state);
         });
         var autoOptions = $('<div>').appendTo(autoRow);
-        $('<label for="red-ui-nrlint-setting-autoLint">').text("Automatically lint after any change").appendTo(autoOptions);
+        $('<label for="red-ui-nrlint-setting-autoLint" data-i18n="nrlint/nrlint:label.autoLint">').appendTo(autoOptions);
         var autoDelayOptions = $('<div class="red-ui-nrlint-rule-opt">').appendTo(autoOptions);
-        var autoDelayLabel = $('<label for="red-ui-nrlint-setting-autoDelay">').text("Delay").appendTo(autoDelayOptions);
-        var autoDelayLint = $('<input type="text" id="red-ui-nrlint-setting-autoDelay" placeholder="Default: 1000">').appendTo(autoDelayLabel);
+        var autoDelayLabel = $('<label for="red-ui-nrlint-setting-autoDelay">').text(RED._("nrlint/nrlint:label.delay")).appendTo(autoDelayOptions);
+        var autoDelayLint = $('<input type="text" id="red-ui-nrlint-setting-autoDelay" data-i18n="[placeholder]nrlint/nrlint:label.default">').appendTo(autoDelayLabel);
 
 
         var disabledRow = $('<div class="red-ui-nrlint-setting-row"></div>').appendTo(headerOptions);
         var lintDisabledFlows = $('<input type="checkbox" id="red-ui-nrlint-setting-lintDisabledFlows">').appendTo(disabledRow);
-        $('<label for="red-ui-nrlint-setting-lintDisabledFlows">').text("Lint disabled flows").appendTo(disabledRow);
+        $('<label for="red-ui-nrlint-setting-lintDisabledFlows" data-i18n="nrlint/nrlint:label.lintDisabledFlows">').appendTo(disabledRow);
 
-        $('<h3>Rules</h3>').appendTo(headerOptions);
+        $('<h3 data-i18n="nrlint/nrlint:label.rules"></h3>').appendTo(headerOptions);
 
         var defaultToolbar = $('<div style="position:relative"></div>').appendTo(headerOptions);
 
-        $('<button type="button" class="red-ui-button red-ui-button-small">Use defaults</button>').appendTo(defaultToolbar).on('click', function(evt) {
+        $('<button type="button" class="red-ui-button red-ui-button-small" data-i18n="nrlint/nrlint:label.useDefaults"></button>').appendTo(defaultToolbar).on('click', function(evt) {
             evt.preventDefault();
             var defaultSettings = RED.settings.nrlint || {rules: {}};
             var ruleSettings = defaultSettings.rules || {};
@@ -416,7 +416,7 @@
             // Lint Settings Panel
             RED.userSettings.add({
                 id:'nrlint',
-                title: "Linter",
+                title: RED._('nrlint/nrlint:label.linter'),
                 get: getSettingsPane,
                 close: function() {
                     var existingSettings = RED.settings.get("nrlint", {rules:{}});
@@ -607,7 +607,7 @@
                 if (!menuOptionMenu) {
                     menuOptionMenu = RED.menu.init({id:"red-ui-nrlint-result-menu",
                         options: [
-                            {id:"red-ui-nrlint-result-menu-item-ignore-node",label:"Ignore for node",onselect:function(){
+                            {id:"red-ui-nrlint-result-menu-item-ignore-node",label:RED._("nrlint/nrlint:label.ignoreNode"),onselect:function(){
                                 var historyEvent = {
                                     t:'multi',
                                     events: []
@@ -627,7 +627,7 @@
                                 }
                                 triggerLint();
                             }},
-                            {id:"red-ui-nrlint-result-menu-item-ignore-group",label:"Ignore for group",onselect:function(){
+                            {id:"red-ui-nrlint-result-menu-item-ignore-group",label:RED._("nrlint/nrlint:label.ignoreGroup"),onselect:function(){
                                 var historyEvent = {
                                     t:'multi',
                                     events: []
@@ -650,7 +650,7 @@
                                 }
                                 triggerLint();
                             }},
-                            {id:"red-ui-nrlint-result-menu-item-ignore-flow",label:"Ignore for flow",onselect:function(){
+                            {id:"red-ui-nrlint-result-menu-item-ignore-flow",label:RED._("nrlint/nrlint:label.ignoreFlow"),onselect:function(){
                                 var historyEvent = {
                                     t:'multi',
                                     events: []
@@ -765,8 +765,8 @@
 
             RED.sidebar.addTab({
                 id: "lint",
-                label: "lint",
-                name: "Linter",
+                label: RED._('nrlint/nrlint:label.lint'),
+                name: RED._('nrlint/nrlint:label.linter'),
                 content: content,
                 enableOnEdit: true,
                 pinned: true,

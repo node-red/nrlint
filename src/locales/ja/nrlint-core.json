@@ -1,0 +1,16 @@
+{
+    "label": {
+        "settings": "設定",
+        "autoLint": "変更があった際に自動的にリントを実行",
+        "delay": "遅延時間 (ミリ秒)",
+        "default": "デフォルト: 1000",
+        "lintDisabledFlows": "無効化されたフローに対してリントを実行",
+        "rules": "条件",
+        "useDefaults": "デフォルト設定を使用",
+        "ignoreNode": "ノードを除外",
+        "ignoreGroup": "グループを除外",
+        "ignoreFlow": "フローを除外",
+        "linter": "リンター",
+        "lint": "リント"
+    }
+}
